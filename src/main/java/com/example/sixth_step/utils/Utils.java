@@ -3,8 +3,7 @@ package com.example.sixth_step.utils;
 
 import com.example.sixth_step.TreeNode;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.*;
 
 public class Utils {
     public static TreeNode buildTree(Integer[] arr) {
@@ -31,5 +30,33 @@ public class Utils {
             i++;
         }
         return root;
+    }
+
+    public static String treeToString(TreeNode root) {
+        if (root == null) return "[]";
+
+        List<String> values = new ArrayList<>();
+        Queue<TreeNode> queue = new LinkedList<>();
+        queue.offer(root);
+
+        while (!queue.isEmpty()) {
+            TreeNode node = queue.poll();
+            if (node != null) {
+                values.add(String.valueOf(node.val));
+                queue.offer(node.left);
+                queue.offer(node.right);
+            } else {
+                values.add("null");
+            }
+        }
+
+        // Убираем конечные "null" (они не нужны)
+        int last = values.size() - 1;
+        while (last >= 0 && values.get(last).equals("null")) {
+            last--;
+        }
+        values = values.subList(0, last + 1);
+
+        return "[" + String.join(", ", values) + "]";
     }
 }
