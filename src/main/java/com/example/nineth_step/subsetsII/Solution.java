@@ -29,7 +29,7 @@ public class Solution {
         Arrays.sort(nums);
 
         List<List<Integer>> result = new ArrayList<>();
-        result.add(new ArrayList<>()); // пустое подмножество
+        result.add(new ArrayList<>());
 
         int sizeBeforePreviousStep = 0;
 
