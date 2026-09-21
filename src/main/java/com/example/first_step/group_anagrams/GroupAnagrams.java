@@ -6,6 +6,27 @@ import java.util.*;
 /**
  * Given an array of strings strs, group the anagrams together. You can return the answer in any order.
  * strs[i] consists of lowercase English letters.
+ * <p>
+ * Дан массив строк strs. Нужно сгруппировать анаграммы вместе.
+ * Вернуть список списков строк. Порядок групп и порядок строк внутри группы — любой.
+ * Анаграмма — слово, полученное из другого перестановкой букв (все буквы используются ровно по разу).
+ * Пример:
+ * <p>
+ * Вход: strs = ["eat", "tea", "tan", "ate", "nat", "bat"]
+ * Выход: [["eat","tea","ate"], ["tan","nat"], ["bat"]]
+ * <p>
+ * Заметка по паттерну
+ * Паттерн: HashMap + уникальный ключ для группировки.
+ * Ключевая идея:
+ * Строим ключ, одинаковый для всех анаграмм.
+ * Вариант 1: частотный массив int[26] → строка с разделителем — O(k).
+ * Что важно запомнить:
+ * Разделитель # в ключе обязателен: без него [1,11] и [11,1] склеятся в "111".
+ * computeIfAbsent(key, k -> new ArrayList<>()).add(str) — стандартный приём.
+ * new ArrayList<>(map.values()) — возврат без лишних проверок.
+ * Сложность:
+ * O(n × k) время
+ * O(n × k) память.
  */
 public class GroupAnagrams {
     public static void main(String[] args) {
@@ -54,6 +75,4 @@ public class GroupAnagrams {
 
         return new ArrayList<>(map.values());
     }
-
-
 }
