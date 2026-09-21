@@ -3,6 +3,30 @@ package com.example.first_step.valid_anagram;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Given two strings s and t, return true if t is an anagram of s, and false otherwise.
+ * Follow up: What if the inputs contain Unicode characters? How would you adapt your solution to such a case?
+ * <p>
+ * Даны две строки s и t. Нужно вернуть true, если t является анаграммой s, иначе false.
+ * Анаграмма — это слово или фраза, образованная из другого слова путём перестановки букв,
+ * с использованием всех исходных букв ровно по одному разу.
+ * <p>
+ * Примеры:
+ * s = "anagram", t = "nagaram" → true (те же буквы, разный порядок)
+ * s = "rat", t = "car" → false (разные буквы)
+ * s = "listen", t = "silent" → true
+ * <p>
+ * Сложность
+ * Время: O(n)
+ * Память: O(1)
+ * <p>
+ * Заметка по паттерну
+ * Паттерн: частотный массив int[26] для строчных латинских букв.
+ * Ключевая идея:
+ * Если длины разные — не анаграмма.
+ * Идём по обеим строкам одним циклом: для s прибавляем, для t вычитаем.
+ * Если все счётчики обнулились — анаграмма.
+ */
 public class ValidAnagram {
     public static void main(String[] args) {
         String s = "anagram";
@@ -12,11 +36,7 @@ public class ValidAnagram {
         System.out.println(isAnagramInt26(s, t));
     }
 
-    /**
-     * Given two strings s and t, return true if t is an anagram of s, and false otherwise.
-     * <p>
-     * Follow up: What if the inputs contain Unicode characters? How would you adapt your solution to such a case?
-     */
+
     public static boolean isAnagramMap(String s, String t) {
         if (s.length() != t.length()) {
             return false;
