@@ -16,8 +16,16 @@
     background: #fff; border-radius: 14px; padding: 20px 24px;
     box-shadow: 0 2px 12px rgba(60, 80, 120, 0.06);
     margin-bottom: 18px;
+  }
+  .header-top {
     display: flex; justify-content: space-between;
     align-items: center; flex-wrap: wrap; gap: 14px;
+    margin-bottom: 12px;
+  }
+  .header-bottom {
+    display: flex; gap: 16px; align-items: center;
+    flex-wrap: wrap; padding-top: 12px;
+    border-top: 1px solid #eef2f7;
   }
   h1 { font-size: 22px; color: #34495e; font-weight: 600; }
   h1 span { color: #5b8def; }
@@ -47,6 +55,19 @@
     font-size: 14px; line-height: 1;
   }
   .btn-icon:hover { background: #fbeaea; }
+
+  .shift-toggle {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; color: #6c7a89; cursor: pointer;
+    padding: 8px 12px; border-radius: 8px;
+    background: #f9fbfd; border: 1px solid #eef2f7;
+    user-select: none;
+  }
+  .shift-toggle:hover { background: #f2f6fb; }
+  .shift-toggle input[type="checkbox"] {
+    width: 16px; height: 16px; cursor: pointer;
+    accent-color: #5b8def;
+  }
 
   .stats {
     display: grid; grid-template-columns: 1fr 1fr 2fr;
@@ -112,6 +133,7 @@
   .task .dates { font-size: 11px; color: #8892a0; line-height: 1.7; }
   .task .dates .review-due { color: #c9843a; font-weight: 600; }
   .task .dates .review-done { color: #5fa877; }
+  .task .dates .shifted { color: #8892a0; font-style: italic; }
 
   .stage-title {
     font-size: 12px; text-transform: uppercase;
@@ -160,13 +182,21 @@
 <div class="container">
 
   <header>
-    <h1>📘 Алгоритмы <span>— трекер</span></h1>
-    <div class="controls">
+    <div class="header-top">
+      <h1>📘 Алгоритмы <span>— трекер</span></h1>
+      <div class="controls">
+        <button class="btn-danger" id="resetBtn">Сбросить всё</button>
+      </div>
+    </div>
+    <div class="header-bottom">
       <label>Старт: <input type="date" id="startDate"></label>
+      <button class="btn-primary" id="updateStart">Обновить старт</button>
       <label>Интервалы: <input type="text" class="intervals-input" id="intervalsInput" placeholder="3, 7, 21"></label>
       <button class="btn-primary" id="applyIntervals">Применить</button>
-      <button class="btn-primary" id="updateStart">Обновить старт</button>
-      <button class="btn-danger" id="resetBtn">Сбросить всё</button>
+      <label class="shift-toggle">
+        <input type="checkbox" id="shiftWeekends">
+        Сдвигать повторения с выходных на понедельник
+      </label>
     </div>
   </header>
 
@@ -214,7 +244,7 @@
 // =====================================================
 // КОНСТАНТЫ И ДАННЫЕ
 // =====================================================
-const STORAGE_KEY = 'algo_tracker_v3';
+const STORAGE_KEY = 'algo_tracker_v4';
 const DEFAULT_INTERVALS = [3, 7, 21];
 
 const STAGES = [
@@ -367,6 +397,28 @@ function fmt(dateStr) {
   return `${d}.${m}`;
 }
 
+function dayOfWeek(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).getDay(); // 0=Sun, 6=Sat
+}
+
+// Сдвиг выходных на понедельник
+function shiftToMonday(dateStr) {
+  const day = dayOfWeek(dateStr);
+  if (day === 0) return addDays(dateStr, 1); // вс → пн
+  if (day === 6) return addDays(dateStr, 2); // сб → пн
+  return dateStr;
+}
+
+// Единая точка расчёта даты повторения
+function computeReviewDate(solvedDate, offset) {
+  let date = addDays(solvedDate, offset);
+  if (state.shiftWeekends) {
+    date = shiftToMonday(date);
+  }
+  return date;
+}
+
 // =====================================================
 // ХРАНИЛИЩЕ
 // =====================================================
@@ -376,7 +428,6 @@ function loadState() {
     if (!raw) throw new Error('empty');
     const parsed = JSON.parse(raw);
     if (!parsed.tasks || !Array.isArray(parsed.tasks)) throw new Error('bad');
-    // Проверка интервалов: массив чисел, непустой, положительные, уникальные
     let intervals = Array.isArray(parsed.intervals) ? parsed.intervals : null;
     if (!intervals || intervals.length === 0) {
       intervals = [...DEFAULT_INTERVALS];
@@ -390,12 +441,14 @@ function loadState() {
     return {
       startDate: parsed.startDate || todayStr(),
       intervals: intervals,
+      shiftWeekends: !!parsed.shiftWeekends,
       tasks: parsed.tasks
     };
   } catch (e) {
     return {
       startDate: todayStr(),
       intervals: [...DEFAULT_INTERVALS],
+      shiftWeekends: false,
       tasks: DEFAULT_TASKS.map(t => ({...t, solvedDate: null}))
     };
   }
@@ -412,6 +465,7 @@ let state = loadState();
 // =====================================================
 const startInput = document.getElementById('startDate');
 const intervalsInput = document.getElementById('intervalsInput');
+const shiftWeekendsChk = document.getElementById('shiftWeekends');
 const taskListEl = document.getElementById('taskList');
 const reviewListEl = document.getElementById('reviewList');
 const solvedCountEl = document.getElementById('solvedCount');
@@ -422,6 +476,7 @@ const progressLabelEl = document.getElementById('progressLabel');
 
 startInput.value = state.startDate;
 intervalsInput.value = state.intervals.join(', ');
+shiftWeekendsChk.checked = state.shiftWeekends;
 
 // =====================================================
 // РЕНДЕР
@@ -458,7 +513,7 @@ function buildTaskRow(task, displayNumber) {
   row.className = 'task' + (solved ? ' solved' : '');
 
   if (solved) {
-    const reviewDates = state.intervals.map(o => addDays(solvedDate, o));
+    const reviewDates = state.intervals.map(o => computeReviewDate(solvedDate, o));
     if (reviewDates.includes(todayStr())) row.classList.add('review-today');
   }
 
@@ -532,17 +587,20 @@ function buildTaskRow(task, displayNumber) {
   });
   row.appendChild(dateInput);
 
-  // Reviews — для каждого интервала отдельная строка
+  // Reviews
   const datesEl = document.createElement('div');
   datesEl.className = 'dates';
   if (solved && state.intervals.length > 0) {
     const lines = [`<div>✅ ${fmt(solvedDate)}</div>`];
     state.intervals.forEach(o => {
-      const rd = addDays(solvedDate, o);
+      const rawDate = addDays(solvedDate, o);
+      const rd = computeReviewDate(solvedDate, o);
+      const shifted = rawDate !== rd;
       const isToday = rd === todayStr();
       const isPast = rd < todayStr();
       const cls = isToday ? 'review-due' : (isPast ? 'review-done' : '');
-      lines.push(`<div class="${cls}">+${o}д: ${fmt(rd)}</div>`);
+      const shiftMark = shifted ? ' <span class="shifted">(сдвиг)</span>' : '';
+      lines.push(`<div class="${cls}">+${o}д: ${fmt(rd)}${shiftMark}</div>`);
     });
     datesEl.innerHTML = lines.join('');
   } else if (solved && state.intervals.length === 0) {
@@ -562,7 +620,7 @@ function renderReviews() {
   state.tasks.forEach(t => {
     if (!t.solvedDate) return;
     state.intervals.forEach(o => {
-      if (addDays(t.solvedDate, o) === today) due.push({ task: t, offset: o });
+      if (computeReviewDate(t.solvedDate, o) === today) due.push({ task: t, offset: o });
     });
   });
 
@@ -608,7 +666,7 @@ function renderStats() {
   state.tasks.forEach(t => {
     if (!t.solvedDate) return;
     state.intervals.forEach(o => {
-      if (addDays(t.solvedDate, o) === today) dueCount++;
+      if (computeReviewDate(t.solvedDate, o) === today) dueCount++;
     });
   });
   reviewCountEl.textContent = dueCount;
@@ -622,7 +680,6 @@ document.getElementById('applyIntervals').addEventListener('click', () => {
   const parts = raw.split(/[,\s]+/).filter(s => s.length > 0);
   const numbers = parts.map(s => parseInt(s, 10));
 
-  // Валидация: все числа целые, положительные
   if (parts.length === 0) {
     alert('Введите хотя бы один интервал. Например: 3, 7, 21');
     return;
@@ -632,14 +689,21 @@ document.getElementById('applyIntervals').addEventListener('click', () => {
     return;
   }
 
-  // Уникальные и отсортированные
   const unique = [...new Set(numbers)].sort((a, b) => a - b);
-
   state.intervals = unique;
   saveState();
   intervalsInput.value = unique.join(', ');
   render();
   alert('Интервалы обновлены: ' + unique.join(', '));
+});
+
+// =====================================================
+// СДВИГ ВЫХОДНЫХ
+// =====================================================
+shiftWeekendsChk.addEventListener('change', () => {
+  state.shiftWeekends = shiftWeekendsChk.checked;
+  saveState();
+  render();
 });
 
 // =====================================================
@@ -697,15 +761,17 @@ document.getElementById('updateStart').addEventListener('click', () => {
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Сбросить ВСЁ: чекбоксы, даты решения, добавленные задачи, интервалы, дату старта?')) return;
+  if (!confirm('Сбросить ВСЁ: чекбоксы, даты решения, добавленные задачи, интервалы, дату старта, сдвиг выходных?')) return;
   localStorage.removeItem(STORAGE_KEY);
   state = {
     startDate: todayStr(),
     intervals: [...DEFAULT_INTERVALS],
+    shiftWeekends: false,
     tasks: DEFAULT_TASKS.map(t => ({...t, solvedDate: null}))
   };
   startInput.value = state.startDate;
   intervalsInput.value = state.intervals.join(', ');
+  shiftWeekendsChk.checked = false;
   render();
 });
 
