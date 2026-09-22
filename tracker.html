@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Трекер алгоритмов</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+    background: #f4f6fa; color: #2c3e50; line-height: 1.5;
+    padding: 24px 16px;
+  }
+  .container { max-width: 1280px; margin: 0 auto; }
+
+  header {
+    background: #fff; border-radius: 14px; padding: 20px 24px;
+    box-shadow: 0 2px 12px rgba(60, 80, 120, 0.06);
+    margin-bottom: 18px;
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 14px;
+  }
+  h1 { font-size: 22px; color: #34495e; font-weight: 600; }
+  h1 span { color: #5b8def; }
+
+  .controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .controls label { font-size: 13px; color: #6c7a89; }
+  input[type="date"], input[type="text"].intervals-input {
+    padding: 7px 10px; border: 1px solid #d6dde6; border-radius: 8px;
+    font-size: 13px; color: #34495e; background: #f9fbfd;
+    font-family: inherit;
+  }
+  input[type="text"].intervals-input { width: 130px; }
+  button {
+    padding: 8px 14px; border: none; border-radius: 8px;
+    font-size: 13px; cursor: pointer; font-weight: 500;
+    transition: all .15s; font-family: inherit;
+  }
+  .btn-primary { background: #5b8def; color: #fff; }
+  .btn-primary:hover { background: #4a7ad9; }
+  .btn-success { background: #5fa877; color: #fff; }
+  .btn-success:hover { background: #4d9166; }
+  .btn-danger { background: #fbeaea; color: #c0555a; }
+  .btn-danger:hover { background: #f5d5d5; }
+  .btn-icon {
+    background: transparent; border: 1px solid #e2e8f0;
+    color: #c0555a; padding: 4px 8px; border-radius: 6px;
+    font-size: 14px; line-height: 1;
+  }
+  .btn-icon:hover { background: #fbeaea; }
+
+  .stats {
+    display: grid; grid-template-columns: 1fr 1fr 2fr;
+    gap: 14px; margin-bottom: 18px;
+  }
+  .stat-card {
+    background: #fff; border-radius: 12px; padding: 16px 20px;
+    box-shadow: 0 2px 12px rgba(60, 80, 120, 0.06);
+  }
+  .stat-card .num { font-size: 26px; font-weight: 700; color: #5b8def; }
+  .stat-card .num.green { color: #5fa877; }
+  .stat-card .label { font-size: 13px; color: #8892a0; margin-top: 2px; }
+  .progress-wrap { display: flex; flex-direction: column; justify-content: center; }
+  .progress-bar {
+    height: 10px; background: #e8eef7; border-radius: 6px;
+    overflow: hidden; margin-top: 8px;
+  }
+  .progress-bar > div {
+    height: 100%; background: linear-gradient(90deg, #5b8def, #7fb685);
+    width: 0%; transition: width .3s;
+  }
+
+  section {
+    background: #fff; border-radius: 14px; padding: 20px 24px;
+    box-shadow: 0 2px 12px rgba(60, 80, 120, 0.06);
+    margin-bottom: 18px;
+  }
+  section h2 {
+    font-size: 17px; color: #34495e; margin-bottom: 14px;
+    font-weight: 600;
+  }
+  .review-empty { color: #8892a0; font-size: 14px; font-style: italic; }
+
+  .task {
+    display: grid;
+    grid-template-columns: 32px 44px 1fr 80px 1fr 30px 130px 260px 32px;
+    gap: 10px; padding: 10px 4px;
+    border-bottom: 1px solid #eef2f7;
+    align-items: center; font-size: 13px;
+    transition: background .15s;
+  }
+  .task:last-child { border-bottom: none; }
+  .task:hover { background: #f9fbfd; }
+  .task.solved { background: #f4faf6; }
+  .task.solved:hover { background: #edf6f0; }
+  .task.review-today { background: #fff8ec; }
+  .task.review-today:hover { background: #fdf1dd; }
+
+  .task input[type="checkbox"] {
+    width: 17px; height: 17px; cursor: pointer;
+    accent-color: #5fa877; justify-self: center;
+  }
+  .task .num { color: #8892a0; font-size: 12px; }
+  .task .name { color: #2c3e50; font-weight: 500; }
+  .task .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 6px;
+    font-size: 11px; font-weight: 500; text-align: center;
+  }
+  .badge.Easy { background: #e4f5ea; color: #4a8c5e; }
+  .badge.Medium { background: #fff2db; color: #b88139; }
+  .badge.Hard { background: #fbe6e6; color: #b85454; }
+  .task .pattern { color: #6c7a89; font-size: 12px; }
+  .task .dates { font-size: 11px; color: #8892a0; line-height: 1.7; }
+  .task .dates .review-due { color: #c9843a; font-weight: 600; }
+  .task .dates .review-done { color: #5fa877; }
+
+  .stage-title {
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: 0.5px; color: #8892a0;
+    margin: 18px 0 6px; font-weight: 600;
+  }
+  .stage-title:first-child { margin-top: 0; }
+
+  .add-form {
+    display: none; grid-template-columns: 2fr 90px 2fr 2fr auto auto;
+    gap: 10px; padding: 14px 4px; margin-bottom: 10px;
+    background: #f9fbfd; border-radius: 10px; align-items: center;
+  }
+  .add-form.open { display: grid; }
+  .add-form input, .add-form select {
+    padding: 7px 10px; border: 1px solid #d6dde6; border-radius: 8px;
+    font-size: 13px; font-family: inherit; color: #34495e;
+    background: #fff;
+  }
+
+  @media (max-width: 900px) {
+    .task {
+      grid-template-columns: 28px 36px 1fr 70px 28px;
+      grid-template-areas:
+        "chk num name level del"
+        ". . pattern pattern ."
+        ". . date date ."
+        ". . reviews reviews .";
+      row-gap: 4px;
+    }
+    .task input[type="checkbox"] { grid-area: chk; }
+    .task .num { grid-area: num; }
+    .task .name { grid-area: name; }
+    .task .badge { grid-area: level; }
+    .task .pattern { grid-area: pattern; }
+    .task .date-input { grid-area: date; }
+    .task .dates { grid-area: reviews; }
+    .task .btn-icon { grid-area: del; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stat-card.wide { grid-column: span 2; }
+    .add-form { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>📘 Алгоритмы <span>— трекер</span></h1>
+    <div class="controls">
+      <label>Старт: <input type="date" id="startDate"></label>
+      <label>Интервалы: <input type="text" class="intervals-input" id="intervalsInput" placeholder="3, 7, 21"></label>
+      <button class="btn-primary" id="applyIntervals">Применить</button>
+      <button class="btn-primary" id="updateStart">Обновить старт</button>
+      <button class="btn-danger" id="resetBtn">Сбросить всё</button>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="num" id="solvedCount">0</div>
+      <div class="label">решено из <span id="totalCount">0</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="num green" id="reviewCount">0</div>
+      <div class="label">повторить сегодня</div>
+    </div>
+    <div class="stat-card wide progress-wrap">
+      <div class="label" id="progressLabel">Прогресс: 0%</div>
+      <div class="progress-bar"><div id="progressFill"></div></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>🔔 На сегодня</h2>
+    <div id="reviewList"></div>
+  </section>
+
+  <section>
+    <h2>📚 Все задачи</h2>
+    <button class="btn-success" id="showAddForm" style="margin-bottom:12px;">+ Добавить задачу</button>
+    <div class="add-form" id="addForm">
+      <input type="text" id="newName" placeholder="Название задачи">
+      <select id="newLevel">
+        <option>Easy</option>
+        <option selected>Medium</option>
+        <option>Hard</option>
+      </select>
+      <input type="text" id="newPattern" placeholder="Паттерн">
+      <select id="newStage"></select>
+      <button class="btn-primary" id="confirmAdd">Добавить</button>
+      <button class="btn-danger" id="cancelAdd">Отмена</button>
+    </div>
+    <div id="taskList"></div>
+  </section>
+
+</div>
+
+<script>
+// =====================================================
+// КОНСТАНТЫ И ДАННЫЕ
+// =====================================================
+const STORAGE_KEY = 'algo_tracker_v3';
+const DEFAULT_INTERVALS = [3, 7, 21];
+
+const STAGES = [
+  "Этап 1. Массивы + Хеш-таблицы",
+  "Этап 2. Два указателя + Sliding Window",
+  "Этап 3. Бинарный поиск",
+  "Этап 4. Связные списки",
+  "Этап 5. Стеки и очереди",
+  "Этап 6. Деревья",
+  "Этап 7. Куча (Heap) и Greedy",
+  "Этап 8. Графы",
+  "Этап 9. Backtracking",
+  "Этап 10. Динамическое программирование",
+  "Бонус. Префиксные суммы и биты"
+];
+
+const DEFAULT_TASKS = [
+  {name:"Two Sum", level:"Easy", pattern:"HashMap", stage:1},
+  {name:"Contains Duplicate", level:"Easy", pattern:"HashSet", stage:1},
+  {name:"Valid Anagram", level:"Easy", pattern:"int[26]", stage:1},
+  {name:"Group Anagrams", level:"Medium", pattern:"HashMap + ключ", stage:1},
+  {name:"Longest Consecutive Sequence", level:"Medium", pattern:"HashSet + начало", stage:1},
+  {name:"Top K Frequent Elements", level:"Medium", pattern:"Bucket sort", stage:1},
+  {name:"Product of Array Except Self", level:"Medium", pattern:"Prefix/Suffix", stage:1},
+  {name:"Valid Sudoku", level:"Medium", pattern:"HashSet / boolean", stage:1},
+  {name:"Best Time to Buy and Sell Stock", level:"Easy", pattern:"Мин-макс", stage:1},
+  {name:"Maximum Subarray", level:"Medium", pattern:"Kadane", stage:1},
+  {name:"Merge Intervals", level:"Medium", pattern:"Сортировка + слияние", stage:1},
+  {name:"Insert Interval", level:"Medium", pattern:"Сортировка + слияние", stage:1},
+  {name:"Valid Palindrome", level:"Easy", pattern:"Два указателя", stage:2},
+  {name:"Two Sum II", level:"Medium", pattern:"Два указателя", stage:2},
+  {name:"3Sum", level:"Medium", pattern:"Два указателя + дубликаты", stage:2},
+  {name:"Container With Most Water", level:"Medium", pattern:"Жадные два указателя", stage:2},
+  {name:"Trapping Rain Water", level:"Hard", pattern:"Два указателя / стек", stage:2},
+  {name:"Move Zeroes", level:"Easy", pattern:"Read/Write pointers", stage:2},
+  {name:"Remove Duplicates from Sorted Array", level:"Easy", pattern:"In-place два указателя", stage:2},
+  {name:"Longest Substring Without Repeating", level:"Medium", pattern:"Sliding window", stage:2},
+  {name:"Longest Repeating Character Replacement", level:"Medium", pattern:"Sliding window + freq", stage:2},
+  {name:"Minimum Size Subarray Sum", level:"Medium", pattern:"Variable window", stage:2},
+  {name:"Find All Anagrams in a String", level:"Medium", pattern:"Fixed window + HashMap", stage:2},
+  {name:"Max Consecutive Ones III", level:"Medium", pattern:"Variable window с K", stage:2},
+  {name:"Binary Search", level:"Easy", pattern:"Классика", stage:3},
+  {name:"Search a 2D Matrix", level:"Medium", pattern:"Бинарный поиск в матрице", stage:3},
+  {name:"Search in Rotated Sorted Array", level:"Medium", pattern:"Поиск в сдвинутом", stage:3},
+  {name:"Search in Rotated Sorted Array II", level:"Medium", pattern:"С дубликатами", stage:3},
+  {name:"Find Minimum in Rotated Sorted Array", level:"Medium", pattern:"Поиск минимума", stage:3},
+  {name:"Koko Eating Bananas", level:"Medium", pattern:"Поиск по ответу", stage:3},
+  {name:"Capacity To Ship Packages", level:"Medium", pattern:"Поиск по ответу", stage:3},
+  {name:"Median of Two Sorted Arrays", level:"Hard", pattern:"Бинарный поиск на двух", stage:3},
+  {name:"Reverse Linked List", level:"Easy", pattern:"Реверс списка", stage:4},
+  {name:"Merge Two Sorted Lists", level:"Easy", pattern:"Слияние", stage:4},
+  {name:"Linked List Cycle", level:"Easy", pattern:"Fast & slow", stage:4},
+  {name:"Linked List Cycle II", level:"Medium", pattern:"Начало цикла", stage:4},
+  {name:"Remove Nth Node From End", level:"Medium", pattern:"Два указателя с отступом", stage:4},
+  {name:"Reorder List", level:"Medium", pattern:"Середина + реверс + слияние", stage:4},
+  {name:"Merge k Sorted Lists", level:"Hard", pattern:"PriorityQueue", stage:4},
+  {name:"Reverse Nodes in k-Group", level:"Hard", pattern:"Реверс группами", stage:4},
+  {name:"Valid Parentheses", level:"Easy", pattern:"Stack", stage:5},
+  {name:"Min Stack", level:"Medium", pattern:"Stack с минимумом", stage:5},
+  {name:"Evaluate Reverse Polish Notation", level:"Medium", pattern:"Стек для вычислений", stage:5},
+  {name:"Generate Parentheses", level:"Medium", pattern:"Backtracking + стек", stage:5},
+  {name:"Daily Temperatures", level:"Medium", pattern:"Монотонный стек", stage:5},
+  {name:"Largest Rectangle in Histogram", level:"Hard", pattern:"Монотонный стек", stage:5},
+  {name:"Sliding Window Maximum", level:"Hard", pattern:"Deque (монотонная очередь)", stage:5},
+  {name:"Decode String", level:"Medium", pattern:"Стек для вложенных строк", stage:5},
+  {name:"Maximum Depth of Binary Tree", level:"Easy", pattern:"DFS / рекурсия", stage:6},
+  {name:"Same Tree", level:"Easy", pattern:"Сравнение деревьев", stage:6},
+  {name:"Invert Binary Tree", level:"Easy", pattern:"Рекурсия", stage:6},
+  {name:"Binary Tree Level Order Traversal", level:"Medium", pattern:"BFS (очередь)", stage:6},
+  {name:"Validate Binary Search Tree", level:"Medium", pattern:"Inorder / min-max", stage:6},
+  {name:"Kth Smallest in BST", level:"Medium", pattern:"Inorder traversal", stage:6},
+  {name:"Construct Binary Tree from Preorder/Inorder", level:"Medium", pattern:"Рекурсивное построение", stage:6},
+  {name:"Binary Tree Maximum Path Sum", level:"Hard", pattern:"DFS + максимум пути", stage:6},
+  {name:"Serialize and Deserialize Binary Tree", level:"Hard", pattern:"BFS/DFS + сериализация", stage:6},
+  {name:"Lowest Common Ancestor of Deepest Leaves", level:"Medium", pattern:"LCA (глубина)", stage:6},
+  {name:"Subtree of Another Tree", level:"Easy", pattern:"Проверка поддерева", stage:6},
+  {name:"Diameter of Binary Tree", level:"Easy", pattern:"DFS + диаметр", stage:6},
+  {name:"Kth Largest Element in an Array", level:"Medium", pattern:"Min-Heap / QuickSelect", stage:7},
+  {name:"Kth Largest Element in a Stream", level:"Easy", pattern:"Min-Heap размера k", stage:7},
+  {name:"Last Stone Weight", level:"Easy", pattern:"Max-Heap", stage:7},
+  {name:"K Closest Points to Origin", level:"Medium", pattern:"Min/Max-Heap", stage:7},
+  {name:"Jump Game", level:"Medium", pattern:"Greedy", stage:7},
+  {name:"Jump Game II", level:"Medium", pattern:"Greedy + BFS", stage:7},
+  {name:"Task Scheduler", level:"Medium", pattern:"Greedy + Heap", stage:7},
+  {name:"Number of Islands", level:"Medium", pattern:"DFS / BFS на матрице", stage:8},
+  {name:"Max Area of Island", level:"Medium", pattern:"DFS / BFS", stage:8},
+  {name:"Clone Graph", level:"Medium", pattern:"DFS / BFS + HashMap", stage:8},
+  {name:"Course Schedule", level:"Medium", pattern:"Топологическая сортировка", stage:8},
+  {name:"Course Schedule II", level:"Medium", pattern:"Топологическая сортировка", stage:8},
+  {name:"Pacific Atlantic Water Flow", level:"Medium", pattern:"DFS с двух сторон", stage:8},
+  {name:"Rotting Oranges", level:"Medium", pattern:"BFS (Multi-source)", stage:8},
+  {name:"Word Ladder", level:"Hard", pattern:"BFS на графе слов", stage:8},
+  {name:"Network Delay Time", level:"Medium", pattern:"Dijkstra", stage:8},
+  {name:"Min Cost to Connect All Points", level:"Medium", pattern:"Union-Find / MST", stage:8},
+  {name:"Number of Provinces", level:"Medium", pattern:"Union-Find / DFS", stage:8},
+  {name:"Redundant Connection", level:"Medium", pattern:"Union-Find", stage:8},
+  {name:"Subsets", level:"Medium", pattern:"Backtracking — основа", stage:9},
+  {name:"Subsets II", level:"Medium", pattern:"С дубликатами", stage:9},
+  {name:"Permutations", level:"Medium", pattern:"Backtracking с visited", stage:9},
+  {name:"Permutations II", level:"Medium", pattern:"С дубликатами", stage:9},
+  {name:"Combination Sum", level:"Medium", pattern:"С повторениями", stage:9},
+  {name:"Combination Sum II", level:"Medium", pattern:"Без повторений", stage:9},
+  {name:"Letter Combinations of a Phone Number", level:"Medium", pattern:"Backtracking", stage:9},
+  {name:"Climbing Stairs", level:"Easy", pattern:"1D DP", stage:10},
+  {name:"House Robber", level:"Medium", pattern:"1D DP", stage:10},
+  {name:"House Robber II", level:"Medium", pattern:"1D DP + circular", stage:10},
+  {name:"Longest Palindromic Substring", level:"Medium", pattern:"2D DP / центр", stage:10},
+  {name:"Longest Common Subsequence", level:"Medium", pattern:"2D DP", stage:10},
+  {name:"Longest Increasing Subsequence", level:"Medium", pattern:"1D DP + бинпоиск", stage:10},
+  {name:"Partition Equal Subset Sum", level:"Medium", pattern:"0/1 Knapsack", stage:10},
+  {name:"Coin Change", level:"Medium", pattern:"Unbounded Knapsack", stage:10},
+  {name:"Coin Change II", level:"Medium", pattern:"Unbounded (способы)", stage:10},
+  {name:"Word Break", level:"Medium", pattern:"1D DP + HashSet", stage:10},
+  {name:"Decode Ways", level:"Medium", pattern:"1D DP", stage:10},
+  {name:"Unique Paths", level:"Medium", pattern:"2D DP → 1D DP", stage:10},
+  {name:"Minimum Path Sum", level:"Medium", pattern:"Grid DP", stage:10},
+  {name:"Edit Distance", level:"Hard", pattern:"2D DP", stage:10},
+  {name:"Range Sum Query - Immutable", level:"Easy", pattern:"Prefix sum", stage:11},
+  {name:"Subarray Sum Equals K", level:"Medium", pattern:"Prefix sum + HashMap", stage:11},
+  {name:"Single Number", level:"Easy", pattern:"XOR", stage:11},
+  {name:"Single Number II", level:"Medium", pattern:"Подсчёт битов mod 3", stage:11},
+  {name:"Sum of Two Integers", level:"Medium", pattern:"Битовая арифметика", stage:11},
+  {name:"Number of 1 Bits", level:"Easy", pattern:"Биты / Керниган", stage:11}
+];
+
+// =====================================================
+// УТИЛИТЫ ДАТ
+// =====================================================
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function addDays(dateStr, days) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const dt = new Date(y, m - 1, d);
+  dt.setDate(dt.getDate() + days);
+  const yy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, '0');
+  const dd = String(dt.getDate()).padStart(2, '0');
+  return `${yy}-${mm}-${dd}`;
+}
+
+function fmt(dateStr) {
+  if (!dateStr) return '';
+  const [, m, d] = dateStr.split('-');
+  return `${d}.${m}`;
+}
+
+// =====================================================
+// ХРАНИЛИЩЕ
+// =====================================================
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) throw new Error('empty');
+    const parsed = JSON.parse(raw);
+    if (!parsed.tasks || !Array.isArray(parsed.tasks)) throw new Error('bad');
+    // Проверка интервалов: массив чисел, непустой, положительные, уникальные
+    let intervals = Array.isArray(parsed.intervals) ? parsed.intervals : null;
+    if (!intervals || intervals.length === 0) {
+      intervals = [...DEFAULT_INTERVALS];
+    } else {
+      intervals = intervals
+        .filter(x => Number.isInteger(x) && x > 0)
+        .filter((v, i, a) => a.indexOf(v) === i)
+        .sort((a, b) => a - b);
+      if (intervals.length === 0) intervals = [...DEFAULT_INTERVALS];
+    }
+    return {
+      startDate: parsed.startDate || todayStr(),
+      intervals: intervals,
+      tasks: parsed.tasks
+    };
+  } catch (e) {
+    return {
+      startDate: todayStr(),
+      intervals: [...DEFAULT_INTERVALS],
+      tasks: DEFAULT_TASKS.map(t => ({...t, solvedDate: null}))
+    };
+  }
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+let state = loadState();
+
+// =====================================================
+// DOM
+// =====================================================
+const startInput = document.getElementById('startDate');
+const intervalsInput = document.getElementById('intervalsInput');
+const taskListEl = document.getElementById('taskList');
+const reviewListEl = document.getElementById('reviewList');
+const solvedCountEl = document.getElementById('solvedCount');
+const totalCountEl = document.getElementById('totalCount');
+const reviewCountEl = document.getElementById('reviewCount');
+const progressFillEl = document.getElementById('progressFill');
+const progressLabelEl = document.getElementById('progressLabel');
+
+startInput.value = state.startDate;
+intervalsInput.value = state.intervals.join(', ');
+
+// =====================================================
+// РЕНДЕР
+// =====================================================
+function render() {
+  taskListEl.innerHTML = '';
+  let globalNum = 0;
+
+  STAGES.forEach((stageTitle, idx) => {
+    const stageNumber = idx + 1;
+    const stageTasks = state.tasks.filter(t => t.stage === stageNumber);
+    if (stageTasks.length === 0) return;
+
+    const header = document.createElement('div');
+    header.className = 'stage-title';
+    header.textContent = stageTitle;
+    taskListEl.appendChild(header);
+
+    stageTasks.forEach(task => {
+      globalNum++;
+      taskListEl.appendChild(buildTaskRow(task, globalNum));
+    });
+  });
+
+  renderReviews();
+  renderStats();
+}
+
+function buildTaskRow(task, displayNumber) {
+  const solved = !!task.solvedDate;
+  const solvedDate = task.solvedDate || '';
+
+  const row = document.createElement('div');
+  row.className = 'task' + (solved ? ' solved' : '');
+
+  if (solved) {
+    const reviewDates = state.intervals.map(o => addDays(solvedDate, o));
+    if (reviewDates.includes(todayStr())) row.classList.add('review-today');
+  }
+
+  // Checkbox
+  const chk = document.createElement('input');
+  chk.type = 'checkbox';
+  chk.checked = solved;
+  chk.addEventListener('change', () => {
+    if (chk.checked) {
+      task.solvedDate = todayStr();
+    } else {
+      task.solvedDate = null;
+    }
+    saveState();
+    render();
+  });
+  row.appendChild(chk);
+
+  // Number
+  const numEl = document.createElement('div');
+  numEl.className = 'num';
+  numEl.textContent = '#' + displayNumber;
+  row.appendChild(numEl);
+
+  // Name
+  const nameEl = document.createElement('div');
+  nameEl.className = 'name';
+  nameEl.textContent = task.name;
+  row.appendChild(nameEl);
+
+  // Level
+  const badge = document.createElement('span');
+  badge.className = 'badge ' + task.level;
+  badge.textContent = task.level;
+  row.appendChild(badge);
+
+  // Pattern
+  const patEl = document.createElement('div');
+  patEl.className = 'pattern';
+  patEl.textContent = task.pattern;
+  row.appendChild(patEl);
+
+  // Delete button
+  const delBtn = document.createElement('button');
+  delBtn.className = 'btn-icon';
+  delBtn.textContent = '×';
+  delBtn.title = 'Удалить задачу';
+  delBtn.addEventListener('click', () => {
+    if (!confirm('Удалить задачу «' + task.name + '»?')) return;
+    const i = state.tasks.indexOf(task);
+    if (i !== -1) state.tasks.splice(i, 1);
+    saveState();
+    render();
+  });
+  row.appendChild(delBtn);
+
+  // Date input
+  const dateInput = document.createElement('input');
+  dateInput.type = 'date';
+  dateInput.className = 'date-input';
+  dateInput.value = solvedDate;
+  dateInput.disabled = !solved;
+  dateInput.addEventListener('change', () => {
+    if (dateInput.value) {
+      task.solvedDate = dateInput.value;
+    } else {
+      task.solvedDate = null;
+    }
+    saveState();
+    render();
+  });
+  row.appendChild(dateInput);
+
+  // Reviews — для каждого интервала отдельная строка
+  const datesEl = document.createElement('div');
+  datesEl.className = 'dates';
+  if (solved && state.intervals.length > 0) {
+    const lines = [`<div>✅ ${fmt(solvedDate)}</div>`];
+    state.intervals.forEach(o => {
+      const rd = addDays(solvedDate, o);
+      const isToday = rd === todayStr();
+      const isPast = rd < todayStr();
+      const cls = isToday ? 'review-due' : (isPast ? 'review-done' : '');
+      lines.push(`<div class="${cls}">+${o}д: ${fmt(rd)}</div>`);
+    });
+    datesEl.innerHTML = lines.join('');
+  } else if (solved && state.intervals.length === 0) {
+    datesEl.innerHTML = `<div>✅ ${fmt(solvedDate)}</div><div>повторений нет</div>`;
+  } else {
+    datesEl.textContent = '—';
+  }
+  row.appendChild(datesEl);
+
+  return row;
+}
+
+function renderReviews() {
+  const today = todayStr();
+  const due = [];
+
+  state.tasks.forEach(t => {
+    if (!t.solvedDate) return;
+    state.intervals.forEach(o => {
+      if (addDays(t.solvedDate, o) === today) due.push({ task: t, offset: o });
+    });
+  });
+
+  reviewListEl.innerHTML = '';
+  if (due.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'review-empty';
+    empty.textContent = 'На сегодня повторений нет. 🎉';
+    reviewListEl.appendChild(empty);
+    return;
+  }
+
+  due.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'task review-today';
+    row.innerHTML = `
+      <div></div>
+      <div class="num">—</div>
+      <div class="name">${item.task.name}</div>
+      <span class="badge ${item.task.level}">${item.task.level}</span>
+      <div class="pattern">${item.task.pattern}</div>
+      <div></div>
+      <div></div>
+      <div class="dates"><span class="review-due">повтор +${item.offset} дн.</span></div>
+      <div></div>
+    `;
+    reviewListEl.appendChild(row);
+  });
+}
+
+function renderStats() {
+  const total = state.tasks.length;
+  const solved = state.tasks.filter(t => t.solvedDate).length;
+  solvedCountEl.textContent = solved;
+  totalCountEl.textContent = total;
+
+  const percent = total > 0 ? Math.round(solved / total * 100) : 0;
+  progressFillEl.style.width = percent + '%';
+  progressLabelEl.textContent = `Прогресс: ${percent}%`;
+
+  const today = todayStr();
+  let dueCount = 0;
+  state.tasks.forEach(t => {
+    if (!t.solvedDate) return;
+    state.intervals.forEach(o => {
+      if (addDays(t.solvedDate, o) === today) dueCount++;
+    });
+  });
+  reviewCountEl.textContent = dueCount;
+}
+
+// =====================================================
+// ПРИМЕНИТЬ ИНТЕРВАЛЫ
+// =====================================================
+document.getElementById('applyIntervals').addEventListener('click', () => {
+  const raw = intervalsInput.value;
+  const parts = raw.split(/[,\s]+/).filter(s => s.length > 0);
+  const numbers = parts.map(s => parseInt(s, 10));
+
+  // Валидация: все числа целые, положительные
+  if (parts.length === 0) {
+    alert('Введите хотя бы один интервал. Например: 3, 7, 21');
+    return;
+  }
+  if (numbers.some(n => !Number.isInteger(n) || n <= 0)) {
+    alert('Все интервалы должны быть положительными целыми числами.');
+    return;
+  }
+
+  // Уникальные и отсортированные
+  const unique = [...new Set(numbers)].sort((a, b) => a - b);
+
+  state.intervals = unique;
+  saveState();
+  intervalsInput.value = unique.join(', ');
+  render();
+  alert('Интервалы обновлены: ' + unique.join(', '));
+});
+
+// =====================================================
+// ФОРМА ДОБАВЛЕНИЯ
+// =====================================================
+const addForm = document.getElementById('addForm');
+const newStageSelect = document.getElementById('newStage');
+
+STAGES.forEach((title, idx) => {
+  const opt = document.createElement('option');
+  opt.value = idx + 1;
+  opt.textContent = title;
+  newStageSelect.appendChild(opt);
+});
+
+document.getElementById('showAddForm').addEventListener('click', () => {
+  addForm.classList.toggle('open');
+});
+
+document.getElementById('cancelAdd').addEventListener('click', () => {
+  addForm.classList.remove('open');
+  document.getElementById('newName').value = '';
+  document.getElementById('newPattern').value = '';
+});
+
+document.getElementById('confirmAdd').addEventListener('click', () => {
+  const name = document.getElementById('newName').value.trim();
+  const level = document.getElementById('newLevel').value;
+  const pattern = document.getElementById('newPattern').value.trim();
+  const stage = parseInt(newStageSelect.value, 10);
+
+  if (!name) {
+    alert('Введите название задачи');
+    return;
+  }
+
+  state.tasks.push({ name, level, pattern, stage, solvedDate: null });
+  saveState();
+
+  document.getElementById('newName').value = '';
+  document.getElementById('newPattern').value = '';
+  addForm.classList.remove('open');
+  render();
+});
+
+// =====================================================
+// КНОПКИ УПРАВЛЕНИЯ
+// =====================================================
+document.getElementById('updateStart').addEventListener('click', () => {
+  const v = startInput.value;
+  if (!v) return;
+  state.startDate = v;
+  saveState();
+  alert('Дата старта обновлена: ' + v);
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  if (!confirm('Сбросить ВСЁ: чекбоксы, даты решения, добавленные задачи, интервалы, дату старта?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state = {
+    startDate: todayStr(),
+    intervals: [...DEFAULT_INTERVALS],
+    tasks: DEFAULT_TASKS.map(t => ({...t, solvedDate: null}))
+  };
+  startInput.value = state.startDate;
+  intervalsInput.value = state.intervals.join(', ');
+  render();
+});
+
+// =====================================================
+// СТАРТ
+// =====================================================
+render();
+</script>
+</body>
+</html>
