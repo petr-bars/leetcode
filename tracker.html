@@ -55,6 +55,12 @@
     font-size: 14px; line-height: 1;
   }
   .btn-icon:hover { background: #fbeaea; }
+  .btn-reset {
+    background: transparent; border: 1px solid #e2e8f0;
+    color: #b88139; padding: 4px 8px; border-radius: 6px;
+    font-size: 13px; line-height: 1;
+  }
+  .btn-reset:hover { background: #fff2db; }
 
   .shift-toggle {
     display: flex; align-items: center; gap: 8px;
@@ -79,6 +85,7 @@
   }
   .stat-card .num { font-size: 26px; font-weight: 700; color: #5b8def; }
   .stat-card .num.green { color: #5fa877; }
+  .stat-card .num.red { color: #c0555a; }
   .stat-card .label { font-size: 13px; color: #8892a0; margin-top: 2px; }
   .progress-wrap { display: flex; flex-direction: column; justify-content: center; }
   .progress-bar {
@@ -103,18 +110,20 @@
 
   .task {
     display: grid;
-    grid-template-columns: 32px 44px 1fr 80px 1fr 30px 130px 260px 32px;
-    gap: 10px; padding: 10px 4px;
+    grid-template-columns: 28px 40px minmax(140px, 1.3fr) 62px minmax(110px, 1fr) 125px 165px 130px 56px;
+    gap: 8px; padding: 10px 4px;
     border-bottom: 1px solid #eef2f7;
     align-items: center; font-size: 13px;
     transition: background .15s;
   }
   .task:last-child { border-bottom: none; }
   .task:hover { background: #f9fbfd; }
-  .task.solved { background: #f4faf6; }
-  .task.solved:hover { background: #edf6f0; }
-  .task.review-today { background: #fff8ec; }
-  .task.review-today:hover { background: #fdf1dd; }
+  .task.solved { background: #f7fbf9; }
+  .task.solved:hover { background: #eef6f1; }
+  .task.due-today { background: #fff8ec; }
+  .task.due-today:hover { background: #fdf1dd; }
+  .task.overdue { background: #fdf0f0; }
+  .task.overdue:hover { background: #fbe4e4; }
 
   .task input[type="checkbox"] {
     width: 17px; height: 17px; cursor: pointer;
@@ -130,10 +139,40 @@
   .badge.Medium { background: #fff2db; color: #b88139; }
   .badge.Hard { background: #fbe6e6; color: #b85454; }
   .task .pattern { color: #6c7a89; font-size: 12px; }
-  .task .dates { font-size: 11px; color: #8892a0; line-height: 1.7; }
-  .task .dates .review-due { color: #c9843a; font-weight: 600; }
-  .task .dates .review-done { color: #5fa877; }
-  .task .dates .shifted { color: #8892a0; font-style: italic; }
+
+  .task .solved-input {
+    padding: 5px 6px; border: 1px solid #d6dde6; border-radius: 6px;
+    font-size: 11px; font-family: inherit; color: #34495e;
+    background: #fff; width: 100%;
+  }
+  .task .solved-input:disabled { background: #f4f6fa; color: #8892a0; }
+
+  .review-controls { display: flex; gap: 4px; align-items: center; }
+  .review-controls .review-input {
+    padding: 5px 6px; border: 1px solid #d6dde6; border-radius: 6px;
+    font-size: 11px; font-family: inherit; color: #34495e;
+    background: #fff; width: 105px;
+  }
+  .review-controls .review-input:disabled { background: #f4f6fa; color: #8892a0; }
+  .review-controls .btn-mark {
+    background: #5fa877; color: #fff; border: none;
+    padding: 5px 9px; border-radius: 6px; cursor: pointer;
+    font-size: 13px; line-height: 1; font-weight: 700;
+  }
+  .review-controls .btn-mark:hover { background: #4d9166; }
+  .review-controls .btn-mark:disabled {
+    background: #d6dde6; color: #8892a0; cursor: not-allowed;
+  }
+
+  .status { font-size: 11px; line-height: 1.5; }
+  .status .next { color: #5b8def; font-weight: 600; }
+  .status .next.overdue { color: #c0555a; }
+  .status .next.due-today { color: #c9843a; }
+  .status .stage { color: #8892a0; }
+  .status .released { color: #5fa877; font-weight: 600; }
+  .status .muted { color: #b8c2cc; }
+
+  .actions { display: flex; gap: 4px; justify-content: flex-end; }
 
   .stage-title {
     font-size: 12px; text-transform: uppercase;
@@ -154,27 +193,44 @@
     background: #fff;
   }
 
-  @media (max-width: 900px) {
+  .review-item {
+    display: grid;
+    grid-template-columns: minmax(140px, 1.3fr) 62px minmax(110px, 1fr) 130px 165px;
+    gap: 10px; padding: 10px 4px;
+    border-bottom: 1px solid #eef2f7;
+    align-items: center; font-size: 13px;
+  }
+  .review-item:last-child { border-bottom: none; }
+  .review-item.overdue { background: #fdf0f0; border-radius: 8px; }
+  .review-due { font-size: 11px; color: #c9843a; font-weight: 600; }
+  .review-due.overdue { color: #c0555a; }
+
+  @media (max-width: 1000px) {
     .task {
-      grid-template-columns: 28px 36px 1fr 70px 28px;
+      grid-template-columns: 28px 36px 1fr 56px;
       grid-template-areas:
-        "chk num name level del"
-        ". . pattern pattern ."
-        ". . date date ."
-        ". . reviews reviews .";
-      row-gap: 4px;
+        "chk num name actions"
+        ".   .   level level"
+        ".   .   pattern pattern"
+        ".   .   solved solved"
+        ".   .   review review"
+        ".   .   status status";
+      row-gap: 6px;
     }
     .task input[type="checkbox"] { grid-area: chk; }
     .task .num { grid-area: num; }
     .task .name { grid-area: name; }
-    .task .badge { grid-area: level; }
+    .task .badge { grid-area: level; justify-self: start; }
     .task .pattern { grid-area: pattern; }
-    .task .date-input { grid-area: date; }
-    .task .dates { grid-area: reviews; }
-    .task .btn-icon { grid-area: del; }
+    .task .solved-input { grid-area: solved; max-width: 200px; }
+    .task .review-controls { grid-area: review; }
+    .task .status { grid-area: status; }
+    .task .actions { grid-area: actions; }
+
     .stats { grid-template-columns: 1fr 1fr; }
     .stat-card.wide { grid-column: span 2; }
     .add-form { grid-template-columns: 1fr 1fr; }
+    .review-item { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -206,8 +262,8 @@
       <div class="label">решено из <span id="totalCount">0</span></div>
     </div>
     <div class="stat-card">
-      <div class="num green" id="reviewCount">0</div>
-      <div class="label">повторить сегодня</div>
+      <div class="num green" id="dueCount">0</div>
+      <div class="label">к повторению сегодня (<span id="overdueCount">0</span> просрочено)</div>
     </div>
     <div class="stat-card wide progress-wrap">
       <div class="label" id="progressLabel">Прогресс: 0%</div>
@@ -216,7 +272,7 @@
   </div>
 
   <section>
-    <h2>🔔 На сегодня</h2>
+    <h2>🔔 На сегодня и просроченные</h2>
     <div id="reviewList"></div>
   </section>
 
@@ -242,9 +298,10 @@
 
 <script>
 // =====================================================
-// КОНСТАНТЫ И ДАННЫЕ
+// КОНСТАНТЫ
 // =====================================================
-const STORAGE_KEY = 'algo_tracker_v4';
+const STORAGE_KEY = 'algo_tracker_v5';
+const OLD_STORAGE_KEYS = ['algo_tracker_v4'];
 const DEFAULT_INTERVALS = [3, 7, 21];
 
 const STAGES = [
@@ -399,32 +456,84 @@ function fmt(dateStr) {
 
 function dayOfWeek(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number);
-  return new Date(y, m - 1, d).getDay(); // 0=Sun, 6=Sat
+  return new Date(y, m - 1, d).getDay();
 }
 
-// Сдвиг выходных на понедельник
 function shiftToMonday(dateStr) {
   const day = dayOfWeek(dateStr);
-  if (day === 0) return addDays(dateStr, 1); // вс → пн
-  if (day === 6) return addDays(dateStr, 2); // сб → пн
+  if (day === 0) return addDays(dateStr, 1);
+  if (day === 6) return addDays(dateStr, 2);
   return dateStr;
 }
 
-// Единая точка расчёта даты повторения
-function computeReviewDate(solvedDate, offset) {
-  let date = addDays(solvedDate, offset);
-  if (state.shiftWeekends) {
-    date = shiftToMonday(date);
-  }
-  return date;
+// =====================================================
+// МОДЕЛЬ ПОВТОРЕНИЙ
+// =====================================================
+// Следующая дата = (lastReviewDate || solvedDate) + intervals[reviewStage]
+// Сдвиг выходных — только для отображения. Фактическая дата повторения
+// берётся как есть и становится новой базой.
+
+function isReleased(task) {
+  return task.reviewStage >= state.intervals.length;
+}
+
+function getNextReviewRaw(task) {
+  if (!task.solvedDate) return null;
+  if (isReleased(task)) return null;
+  const base = task.lastReviewDate || task.solvedDate;
+  const interval = state.intervals[task.reviewStage];
+  if (interval === undefined) return null;
+  return addDays(base, interval);
+}
+
+function getNextReviewDisplay(task) {
+  const raw = getNextReviewRaw(task);
+  if (!raw) return null;
+  return state.shiftWeekends ? shiftToMonday(raw) : raw;
+}
+
+function getDueStatus(task) {
+  if (!task.solvedDate) return 'none';
+  if (isReleased(task)) return 'released';
+  const display = getNextReviewDisplay(task);
+  if (!display) return 'none';
+  const today = todayStr();
+  if (display < today) return 'overdue';
+  if (display === today) return 'today';
+  return 'future';
 }
 
 // =====================================================
-// ХРАНИЛИЩЕ
+// МИГРАЦИЯ И ХРАНИЛИЩЕ
 // =====================================================
+function normalizeTask(t) {
+  const solvedDate = t.solvedDate || null;
+  let history = Array.isArray(t.history) ? t.history : null;
+  if (!history) {
+    history = solvedDate ? [{type:'solve', date: solvedDate, stage: 0}] : [];
+  }
+  return {
+    name: t.name || 'Unnamed',
+    level: t.level || 'Medium',
+    pattern: t.pattern || '',
+    stage: t.stage || 1,
+    solvedDate,
+    lastReviewDate: t.lastReviewDate || null,
+    reviewStage: Number.isInteger(t.reviewStage) ? t.reviewStage : 0,
+    released: !!t.released,
+    history
+  };
+}
+
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    let raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      for (const oldKey of OLD_STORAGE_KEYS) {
+        const old = localStorage.getItem(oldKey);
+        if (old) { raw = old; break; }
+      }
+    }
     if (!raw) throw new Error('empty');
     const parsed = JSON.parse(raw);
     if (!parsed.tasks || !Array.isArray(parsed.tasks)) throw new Error('bad');
@@ -442,14 +551,14 @@ function loadState() {
       startDate: parsed.startDate || todayStr(),
       intervals: intervals,
       shiftWeekends: !!parsed.shiftWeekends,
-      tasks: parsed.tasks
+      tasks: parsed.tasks.map(normalizeTask)
     };
   } catch (e) {
     return {
       startDate: todayStr(),
       intervals: [...DEFAULT_INTERVALS],
       shiftWeekends: false,
-      tasks: DEFAULT_TASKS.map(t => ({...t, solvedDate: null}))
+      tasks: DEFAULT_TASKS.map(t => normalizeTask({...t, solvedDate: null}))
     };
   }
 }
@@ -470,13 +579,50 @@ const taskListEl = document.getElementById('taskList');
 const reviewListEl = document.getElementById('reviewList');
 const solvedCountEl = document.getElementById('solvedCount');
 const totalCountEl = document.getElementById('totalCount');
-const reviewCountEl = document.getElementById('reviewCount');
+const dueCountEl = document.getElementById('dueCount');
+const overdueCountEl = document.getElementById('overdueCount');
 const progressFillEl = document.getElementById('progressFill');
 const progressLabelEl = document.getElementById('progressLabel');
 
 startInput.value = state.startDate;
 intervalsInput.value = state.intervals.join(', ');
 shiftWeekendsChk.checked = state.shiftWeekends;
+
+// =====================================================
+// ДЕЙСТВИЯ НАД ЗАДАЧЕЙ
+// =====================================================
+function markSolved(task, date) {
+  task.solvedDate = date;
+  task.lastReviewDate = null;
+  task.reviewStage = 0;
+  task.released = false;
+  task.history = [{ type: 'solve', date, stage: 0 }];
+}
+
+function clearSolved(task) {
+  task.solvedDate = null;
+  task.lastReviewDate = null;
+  task.reviewStage = 0;
+  task.released = false;
+  task.history = [];
+}
+
+function markReviewed(task, date) {
+  if (!task.solvedDate) return;
+  if (isReleased(task)) return;
+  task.lastReviewDate = date;
+  task.reviewStage += 1;
+  if (task.reviewStage >= state.intervals.length) task.released = true;
+  task.history.push({ type: 'review', date, stage: task.reviewStage });
+}
+
+function resetProgress(task) {
+  if (!task.solvedDate) return;
+  task.lastReviewDate = null;
+  task.reviewStage = 0;
+  task.released = false;
+  task.history = [{ type: 'solve', date: task.solvedDate, stage: 0 }];
+}
 
 // =====================================================
 // РЕНДЕР
@@ -507,26 +653,20 @@ function render() {
 
 function buildTaskRow(task, displayNumber) {
   const solved = !!task.solvedDate;
-  const solvedDate = task.solvedDate || '';
+  const status = getDueStatus(task);
 
   const row = document.createElement('div');
   row.className = 'task' + (solved ? ' solved' : '');
-
-  if (solved) {
-    const reviewDates = state.intervals.map(o => computeReviewDate(solvedDate, o));
-    if (reviewDates.includes(todayStr())) row.classList.add('review-today');
-  }
+  if (status === 'today') row.classList.add('due-today');
+  if (status === 'overdue') row.classList.add('overdue');
 
   // Checkbox
   const chk = document.createElement('input');
   chk.type = 'checkbox';
   chk.checked = solved;
   chk.addEventListener('change', () => {
-    if (chk.checked) {
-      task.solvedDate = todayStr();
-    } else {
-      task.solvedDate = null;
-    }
+    if (chk.checked) markSolved(task, todayStr());
+    else clearSolved(task);
     saveState();
     render();
   });
@@ -556,7 +696,88 @@ function buildTaskRow(task, displayNumber) {
   patEl.textContent = task.pattern;
   row.appendChild(patEl);
 
-  // Delete button
+  // Solved date
+  const solvedInput = document.createElement('input');
+  solvedInput.type = 'date';
+  solvedInput.className = 'solved-input';
+  solvedInput.value = task.solvedDate || '';
+  solvedInput.disabled = !solved;
+  solvedInput.title = solved ? 'Дата первого решения' : 'Сначала отметьте задачу решённой';
+  solvedInput.addEventListener('change', () => {
+    if (solvedInput.value) {
+      // если меняем дату решения — не сбрасываем историю, но обновляем базу,
+      // если повторений ещё не было
+      task.solvedDate = solvedInput.value;
+      if (!task.lastReviewDate) {
+        task.history = [{ type: 'solve', date: task.solvedDate, stage: 0 }];
+      }
+    }
+    saveState();
+    render();
+  });
+  row.appendChild(solvedInput);
+
+  // Review controls
+  const rc = document.createElement('div');
+  rc.className = 'review-controls';
+
+  const reviewInput = document.createElement('input');
+  reviewInput.type = 'date';
+  reviewInput.className = 'review-input';
+  reviewInput.title = 'Дата повторения (пусто = сегодня)';
+  reviewInput.disabled = !solved || isReleased(task);
+  rc.appendChild(reviewInput);
+
+  const markBtn = document.createElement('button');
+  markBtn.className = 'btn-mark';
+  markBtn.textContent = '✓';
+  markBtn.title = isReleased(task) ? 'Все повторения пройдены' : 'Отметить повторение';
+  markBtn.disabled = !solved || isReleased(task);
+  markBtn.addEventListener('click', () => {
+    const date = reviewInput.value || todayStr();
+    markReviewed(task, date);
+    saveState();
+    render();
+  });
+  rc.appendChild(markBtn);
+
+  row.appendChild(rc);
+
+  // Status
+  const statusEl = document.createElement('div');
+  statusEl.className = 'status';
+  if (!solved) {
+    statusEl.innerHTML = '<span class="muted">—</span>';
+  } else if (isReleased(task)) {
+    statusEl.innerHTML = '<span class="released">✅ выпущена</span>';
+  } else {
+    const display = getNextReviewDisplay(task);
+    const stageNum = task.reviewStage + 1;
+    const total = state.intervals.length;
+    let cls = '';
+    if (status === 'overdue') cls = 'overdue';
+    else if (status === 'today') cls = 'due-today';
+    statusEl.innerHTML = `<div class="next ${cls}">→ ${fmt(display)}</div><div class="stage">этап ${stageNum}/${total}</div>`;
+  }
+  row.appendChild(statusEl);
+
+  // Actions
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'btn-reset';
+  resetBtn.textContent = '↺';
+  resetBtn.title = 'Сбросить прогресс повторений (начать с этапа 1)';
+  resetBtn.disabled = !solved || (task.reviewStage === 0 && !task.lastReviewDate);
+  resetBtn.addEventListener('click', () => {
+    if (!confirm('Сбросить прогресс повторений для «' + task.name + '»?\nЗадача останется решённой, но интервалы начнутся заново.')) return;
+    resetProgress(task);
+    saveState();
+    render();
+  });
+  actions.appendChild(resetBtn);
+
   const delBtn = document.createElement('button');
   delBtn.className = 'btn-icon';
   delBtn.textContent = '×';
@@ -568,64 +789,30 @@ function buildTaskRow(task, displayNumber) {
     saveState();
     render();
   });
-  row.appendChild(delBtn);
+  actions.appendChild(delBtn);
 
-  // Date input
-  const dateInput = document.createElement('input');
-  dateInput.type = 'date';
-  dateInput.className = 'date-input';
-  dateInput.value = solvedDate;
-  dateInput.disabled = !solved;
-  dateInput.addEventListener('change', () => {
-    if (dateInput.value) {
-      task.solvedDate = dateInput.value;
-    } else {
-      task.solvedDate = null;
-    }
-    saveState();
-    render();
-  });
-  row.appendChild(dateInput);
-
-  // Reviews
-  const datesEl = document.createElement('div');
-  datesEl.className = 'dates';
-  if (solved && state.intervals.length > 0) {
-    const lines = [`<div>✅ ${fmt(solvedDate)}</div>`];
-    state.intervals.forEach(o => {
-      const rawDate = addDays(solvedDate, o);
-      const rd = computeReviewDate(solvedDate, o);
-      const shifted = rawDate !== rd;
-      const isToday = rd === todayStr();
-      const isPast = rd < todayStr();
-      const cls = isToday ? 'review-due' : (isPast ? 'review-done' : '');
-      const shiftMark = shifted ? ' <span class="shifted">(сдвиг)</span>' : '';
-      lines.push(`<div class="${cls}">+${o}д: ${fmt(rd)}${shiftMark}</div>`);
-    });
-    datesEl.innerHTML = lines.join('');
-  } else if (solved && state.intervals.length === 0) {
-    datesEl.innerHTML = `<div>✅ ${fmt(solvedDate)}</div><div>повторений нет</div>`;
-  } else {
-    datesEl.textContent = '—';
-  }
-  row.appendChild(datesEl);
+  row.appendChild(actions);
 
   return row;
 }
 
 function renderReviews() {
   const today = todayStr();
-  const due = [];
+  const items = [];
 
   state.tasks.forEach(t => {
-    if (!t.solvedDate) return;
-    state.intervals.forEach(o => {
-      if (computeReviewDate(t.solvedDate, o) === today) due.push({ task: t, offset: o });
-    });
+    const st = getDueStatus(t);
+    if (st === 'today' || st === 'overdue') {
+      const raw = getNextReviewRaw(t);
+      items.push({ task: t, status: st, display: getNextReviewDisplay(t), raw });
+    }
   });
 
+  // Сортируем: сначала просроченные (старые), потом сегодняшние
+  items.sort((a, b) => a.raw.localeCompare(b.raw));
+
   reviewListEl.innerHTML = '';
-  if (due.length === 0) {
+  if (items.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'review-empty';
     empty.textContent = 'На сегодня повторений нет. 🎉';
@@ -633,20 +820,56 @@ function renderReviews() {
     return;
   }
 
-  due.forEach(item => {
+  items.forEach(item => {
+    const t = item.task;
     const row = document.createElement('div');
-    row.className = 'task review-today';
-    row.innerHTML = `
-      <div></div>
-      <div class="num">—</div>
-      <div class="name">${item.task.name}</div>
-      <span class="badge ${item.task.level}">${item.task.level}</span>
-      <div class="pattern">${item.task.pattern}</div>
-      <div></div>
-      <div></div>
-      <div class="dates"><span class="review-due">повтор +${item.offset} дн.</span></div>
-      <div></div>
-    `;
+    row.className = 'review-item' + (item.status === 'overdue' ? ' overdue' : '');
+
+    const name = document.createElement('div');
+    name.className = 'name';
+    name.textContent = t.name;
+    row.appendChild(name);
+
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + t.level;
+    badge.textContent = t.level;
+    row.appendChild(badge);
+
+    const pat = document.createElement('div');
+    pat.className = 'pattern';
+    pat.textContent = t.pattern;
+    row.appendChild(pat);
+
+    const due = document.createElement('div');
+    due.className = 'review-due' + (item.status === 'overdue' ? ' overdue' : '');
+    due.textContent = item.status === 'overdue'
+      ? `⚠ просрочено с ${fmt(item.display)}`
+      : `сегодня (этап ${t.reviewStage + 1}/${state.intervals.length})`;
+    row.appendChild(due);
+
+    const rc = document.createElement('div');
+    rc.className = 'review-controls';
+
+    const input = document.createElement('input');
+    input.type = 'date';
+    input.className = 'review-input';
+    input.title = 'Дата повторения (пусто = сегодня)';
+    rc.appendChild(input);
+
+    const btn = document.createElement('button');
+    btn.className = 'btn-mark';
+    btn.textContent = '✓';
+    btn.title = 'Отметить повторение';
+    btn.addEventListener('click', () => {
+      const date = input.value || todayStr();
+      markReviewed(t, date);
+      saveState();
+      render();
+    });
+    rc.appendChild(btn);
+
+    row.appendChild(rc);
+
     reviewListEl.appendChild(row);
   });
 }
@@ -661,19 +884,19 @@ function renderStats() {
   progressFillEl.style.width = percent + '%';
   progressLabelEl.textContent = `Прогресс: ${percent}%`;
 
-  const today = todayStr();
-  let dueCount = 0;
+  let todayCount = 0;
+  let overdueCount = 0;
   state.tasks.forEach(t => {
-    if (!t.solvedDate) return;
-    state.intervals.forEach(o => {
-      if (computeReviewDate(t.solvedDate, o) === today) dueCount++;
-    });
+    const st = getDueStatus(t);
+    if (st === 'today') todayCount++;
+    else if (st === 'overdue') overdueCount++;
   });
-  reviewCountEl.textContent = dueCount;
+  dueCountEl.textContent = todayCount;
+  overdueCountEl.textContent = overdueCount;
 }
 
 // =====================================================
-// ПРИМЕНИТЬ ИНТЕРВАЛЫ
+// ИНТЕРВАЛЫ
 // =====================================================
 document.getElementById('applyIntervals').addEventListener('click', () => {
   const raw = intervalsInput.value;
@@ -740,7 +963,9 @@ document.getElementById('confirmAdd').addEventListener('click', () => {
     return;
   }
 
-  state.tasks.push({ name, level, pattern, stage, solvedDate: null });
+  state.tasks.push(normalizeTask({
+    name, level, pattern, stage, solvedDate: null
+  }));
   saveState();
 
   document.getElementById('newName').value = '';
@@ -750,7 +975,7 @@ document.getElementById('confirmAdd').addEventListener('click', () => {
 });
 
 // =====================================================
-// КНОПКИ УПРАВЛЕНИЯ
+// УПРАВЛЕНИЕ
 // =====================================================
 document.getElementById('updateStart').addEventListener('click', () => {
   const v = startInput.value;
@@ -761,13 +986,14 @@ document.getElementById('updateStart').addEventListener('click', () => {
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
-  if (!confirm('Сбросить ВСЁ: чекбоксы, даты решения, добавленные задачи, интервалы, дату старта, сдвиг выходных?')) return;
+  if (!confirm('Сбросить ВСЁ: чекбоксы, даты решения, историю повторений, добавленные задачи, интервалы, дату старта, сдвиг выходных?')) return;
   localStorage.removeItem(STORAGE_KEY);
+  OLD_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
   state = {
     startDate: todayStr(),
     intervals: [...DEFAULT_INTERVALS],
     shiftWeekends: false,
-    tasks: DEFAULT_TASKS.map(t => ({...t, solvedDate: null}))
+    tasks: DEFAULT_TASKS.map(t => normalizeTask({...t, solvedDate: null}))
   };
   startInput.value = state.startDate;
   intervalsInput.value = state.intervals.join(', ');
