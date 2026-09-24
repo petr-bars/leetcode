@@ -6,6 +6,20 @@ import java.util.Set;
 
 /**
  * Given a string s, find the length of the longest substring without duplicate characters.
+ * <p>
+ * Дана строка s. Найти длину самой длинной подстроки без повторяющихся символов.
+ * Пример:
+ * Вход:  s = "abcabcbb"
+ * Выход: 3
+ * Пояснение: "abc", длина 3.
+ * Идея
+ * Окно [left, right] — текущая подстрока без повторов. right расширяет окно вправо.
+ * Если новый символ уже внутри окна (его прошлая позиция >= left), прыгаем left за этой позицией. Иначе оставляем.
+ * На каждом шаге обновляем максимум длины.
+ * lastPos[c] — где символ встречался в последний раз. Проверка lastPos[c] >= left = «символ внутри окна».
+ * Сложность
+ * Время: O(n) — один проход, right двигается только вперёд, left только прыгает вперёд.
+ * Память: O(1) — массив на 256 (фиксированный алфавит).
  */
 public class LongestSubstringWithoutRepeating {
     public static void main(String[] args) {
