@@ -38,12 +38,13 @@ public class TwoSum {
 
     public static int[] twoSumMap(int[] nums, int target) {
         Map<Integer, Integer> map = new HashMap<>();
-        for (int i = 0; i < nums.length; i++) {
-            int x = target - nums[i];
-            if (!map.containsKey(x)) {
-                map.put(nums[i], i);
+        for (int index = 0; index < nums.length; index++) {
+            int complement = target - nums[index];
+            Integer prev = map.get(complement);
+            if (prev == null) {
+                map.put(nums[index], index);
             } else {
-                return new int[]{map.get(x), i};
+                return new int[]{prev, index};
             }
         }
         return new int[0];
