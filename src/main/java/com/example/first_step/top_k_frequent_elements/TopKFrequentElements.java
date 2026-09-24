@@ -17,12 +17,18 @@ import java.util.*;
  * <p>
  * Паттерн: Bucket sort по частотам.
  * Ключевая идея:
- * Считаем частоты через HashMap.merge.
- * Создаём buckets[f] = список чисел с частотой f. Размер n + 1.
+ * Считаем частоты через HashMap → merge(num, 1, Integer::sum).
+ * Создаём buckets длиной n + 1: индекс = частота, значение = список чисел с этой частотой.
  * Идём с конца (от высокой частоты к низкой), собираем k чисел.
- * Что важно запомнить:
- * Частота не может быть больше n, поэтому массив размера n + 1.
- * merge(num, 1, Integer::sum) — элегантный подсчёт частот.
+ * В одном ведре может быть несколько чисел — если они встречаются одинаковое количество раз.
+ * Поэтому внутренний цикл идёт по всему списку ведра, а не берёт только первый элемент.
+ * Из одного ведра можно набрать все k — например, если все числа встречаются одинаково часто.
+ * Внешний цикл останавливается, когда result.size() == k.
+ * Внутренний цикл прерывается через break, когда k набран внутри одного ведра.
+ * Что не перепутать:
+ * Размер ведра — n + 1, потому что максимальная частота — n.
+ * Индекс ведра — частота, а не число.
+ * break выходит только из внутреннего цикла. Остановка внешнего — через условие result.size() < k.
  * Время: O(n),
  * Память: O(n).
  */
@@ -30,13 +36,14 @@ public class TopKFrequentElements {
 
     public static void main(String[] args) {
         int[] nums = new int[]{1, 1, 1, 2, 2, 3};
+//        int[] nums = new int[]{1,1,2,2,3,3};
         int k = 2;
+//        int k = 3;
 
         System.out.println(Arrays.toString(topKFrequentBucketSort(nums, k)));
     }
 
     public static int[] topKFrequentBucketSort(int[] nums, int k) {
-
         Map<Integer, Integer> frequencyMap = new HashMap<>();
         for (int item : nums) {
             frequencyMap.merge(item, 1, Integer::sum);
@@ -52,18 +59,18 @@ public class TopKFrequentElements {
             buckets[frequency].add(number);
         }
 
-        List<Integer> list = new ArrayList<>();
-        for (int bucketIndex = buckets.length - 1; bucketIndex >= 0 && list.size() < k; bucketIndex--) {
+        List<Integer> result = new ArrayList<>();
+        for (int bucketIndex = buckets.length - 1; bucketIndex > 0 && result.size() < k; bucketIndex--) {
             if (buckets[bucketIndex] != null) {
                 for (int value : buckets[bucketIndex]) {
-                    list.add(value);
-                    if (list.size() == k) {
+                    result.add(value);
+                    if (result.size() == k) {
                         break;
                     }
                 }
             }
         }
 
-        return list.stream().mapToInt(Integer::intValue).toArray();
+        return result.stream().mapToInt(Integer::intValue).toArray();
     }
 }
