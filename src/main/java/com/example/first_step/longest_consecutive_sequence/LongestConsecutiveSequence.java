@@ -1,6 +1,5 @@
 package com.example.first_step.longest_consecutive_sequence;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,14 +18,14 @@ import java.util.Set;
  * <p>
  * Заметка по паттерну
  * Паттерн: HashSet + поиск начала последовательности.
- * Ключевая идея:
- * Все числа в HashSet.
- * Начало последовательности — число, у которого num - 1 нет в set.
- * От каждого начала идём вверх через while (set.contains(current + 1)).
- * Что важно запомнить:
- * Идём по set, а не по массиву.
- * Условие !contains(num - 1) — ключевое для O(n).
- * Считать длину и обновлять максимум — только внутри if.
+ * Ключевая идея
+ * Кладём все числа в HashSet — чтобы за O(1) отвечать на вопрос «есть ли такое число».
+ * Дальше для каждого числа num проверяем: есть ли в сете число num - 1?
+ * Есть → это не начало цепочки. Пропускаем. Эту цепочку посчитают, когда дойдут до её настоящего начала.
+ * Нет → это начало. Идём вправо: num + 1, num + 2, ... пока они есть в сете. Считаем длину.
+ * Почему именно так: если num - 1 нет, значит, слева от num цепочка не продолжается — num первый.
+ * Если бы мы начинали считать с середины, то посчитали бы кусок цепочки, а не всю её длину.
+ * А так каждая цепочка считается ровно один раз — от своего начала.
  * Сложность:
  * O(n) время,
  * O(n) память.
@@ -35,31 +34,10 @@ import java.util.Set;
 public class LongestConsecutiveSequence {
     public static void main(String[] args) {
         int[] nums = new int[]{100, 4, 200, 1, 1, 1, 3, 2};
+//        int[] nums = new int[]{1, 2, 3, 4, 5, 10, 11, 20, 21, 22, 23, 24, 25};
 
-        System.out.println(longestConsecutiveWithSort(nums));
         System.out.println(longestConsecutiveWithHashSet(nums));
-    }
 
-    public static int longestConsecutiveWithSort(int[] nums) {
-        if (nums.length == 0) {
-            return 0;
-        }
-        Arrays.sort(nums);
-        int counter = 1;
-        int result = 0;
-        for (int index = 1; index < nums.length; index++) {
-            if (nums[index] == nums[index - 1]) {
-                continue;
-            }
-
-            if (nums[index] == nums[index - 1] + 1) {
-                counter++;
-            } else if (counter > result) {
-                result = counter;
-                counter = 1;
-            }
-        }
-        return Math.max(result, counter);
     }
 
     public static int longestConsecutiveWithHashSet(int[] nums) {
