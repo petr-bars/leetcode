@@ -33,7 +33,7 @@ public class ValidAnagram {
         String t = "nagaram";
 
         System.out.println(isAnagramMap(s, t));
-        System.out.println(isAnagramInt26(s, t));
+        System.out.println(isAnagramInt261(s, t));
     }
 
 
@@ -62,8 +62,7 @@ public class ValidAnagram {
         return map.isEmpty();
     }
 
-
-    public static boolean isAnagramInt26(String s, String t) {
+    public static boolean isAnagramInt261(String s, String t) {
         if (s.length() != t.length()) {
             return false;
         }
