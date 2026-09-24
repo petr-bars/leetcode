@@ -36,43 +36,32 @@ public class GroupAnagrams {
         System.out.println(groupAnagramsByFrequency(strs));
     }
 
-    public static List<List<String>> groupAnagramsBySorting(String[] strs) {
-        if (strs == null || strs.length == 0) {
-            return new ArrayList<>();
+    public static List<List<String>> groupAnagramsByFrequency(String[] strs) {
+        Map<String, List<String>> groups = new HashMap<>();
+        for (String str : strs) {
+            char[] strChars = str.toCharArray();
+            int[] frequency = new int[26];
+            for (char strChar : strChars) {
+                frequency[strChar - 'a']++;
+            }
+            StringBuilder keyBuilder = new StringBuilder();
+            for (int freq : frequency) {
+                keyBuilder.append(freq).append('#');
+            }
+            String key = keyBuilder.toString();
+            groups.computeIfAbsent(key, k -> new ArrayList<>()).add(str);
         }
-
-        Map<String, List<String>> map = new HashMap<>();
-        for (String item : strs) {
-            char[] chars = item.toCharArray();
-            Arrays.sort(chars);
-            // Добавляем строку в соответствующую группу
-            map.computeIfAbsent(new String(chars), k -> new ArrayList<>()).add(item);
-        }
-
-        return new ArrayList<>(map.values());
+        return new ArrayList<>(groups.values());
     }
 
-    public static List<List<String>> groupAnagramsByFrequency(String[] strs) {
-        if (strs == null || strs.length == 0) {
-            return new ArrayList<>();
+    public static List<List<String>> groupAnagramsBySorting(String[] strs) {
+        Map<String, List<String>> groups = new HashMap<>();
+        for (String str : strs) {
+            char[] chars = str.toCharArray();
+            Arrays.sort(chars);
+            String key = new String(chars);
+            groups.computeIfAbsent(key, k -> new ArrayList<>()).add(str);
         }
-
-        Map<String, List<String>> map = new HashMap<>();
-        for (String s : strs) {
-            int[] count = new int[26];
-            for (char c : s.toCharArray()) {
-                count[c - 'a']++;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            for (int i : count) {
-                sb.append(i).append('#');
-            }
-
-            String key = sb.toString();
-            map.computeIfAbsent(key, k -> new ArrayList<>()).add(s);
-        }
-
-        return new ArrayList<>(map.values());
+        return new ArrayList<>(groups.values());
     }
 }
