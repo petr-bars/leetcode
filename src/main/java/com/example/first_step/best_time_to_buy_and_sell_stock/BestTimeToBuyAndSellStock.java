@@ -36,14 +36,18 @@ package com.example.first_step.best_time_to_buy_and_sell_stock;
  */
 public class BestTimeToBuyAndSellStock {
     public static void main(String[] args) {
-//        int [] prices = new int[] {7,1,5,3,6,4};
-        int[] prices = new int[]{7, 6, 4, 3, 1};
+        int[] prices = new int[]{7, 1, 5, 3, 6, 4};
+//        int[] prices = new int[]{7, 6, 4, 3, 1};
 
         System.out.println(maxProfit(prices));
     }
 
+
     public static int maxProfit(int[] prices) {
-        int minPrice = Integer.MAX_VALUE;
+        if (prices.length == 0) {
+            return 0;
+        }
+        int minPrice = prices[0];
         int maxProfit = 0;
         for (int price : prices) {
             if (price < minPrice) {
