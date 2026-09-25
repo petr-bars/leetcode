@@ -32,6 +32,18 @@ public class MaximumSubarray {
         int[] nums = new int[]{4, -1, 2, 1};
 
         System.out.println(maxSubArray(nums));
+        System.out.println(maxSubArray1(nums));
+    }
+
+    public static int maxSubArray1(int[] nums) {
+        int currentSum = 0;
+        int bestSum = nums[0];
+
+        for (int num : nums) {
+            currentSum = Math.max(num, currentSum + num);
+            bestSum = Math.max(bestSum, currentSum);
+        }
+        return bestSum;
     }
 
     public static int maxSubArray(int[] nums) {
