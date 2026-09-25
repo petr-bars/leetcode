@@ -88,16 +88,16 @@ public class ValidSudoku {
         Set<String> seen = new HashSet<>();
         for (int rowIndex = 0; rowIndex < length; rowIndex++) {
             for (int colIndex = 0; colIndex < length; colIndex++) {
-                char currentSymbol = board[rowIndex][colIndex];
-                if (currentSymbol == '.') {
+                char value = board[rowIndex][colIndex];
+                if (value == '.') {
                     continue;
                 }
 
-                String row = "row" + rowIndex + currentSymbol;
-                String col = "col" + colIndex + currentSymbol;
-                String box = "box" + (rowIndex / 3) + "_" + (colIndex / 3) + currentSymbol;
+                String rowKey = "row" + rowIndex + value;
+                String colKey = "col" + colIndex + value;
+                String boxKey = "box" + (rowIndex / 3) + "_" + (colIndex / 3) + value;
 
-                if (!seen.add(row) || !seen.add(col) || !seen.add(box)) {
+                if (!seen.add(rowKey) || !seen.add(colKey) || !seen.add(boxKey)) {
                     return false;
                 }
             }
