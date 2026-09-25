@@ -55,7 +55,7 @@ public class MergeIntervals {
 
         for (int index = 1; index < intervals.length; index++) {
             int[] nextInterval = intervals[index];
-            if (currentInterval[1] >= nextInterval[0]) {
+            if (currentInterval[1] >= nextInterval[0]) {//Схлопываем интервалы
                 currentInterval[1] = Math.max(currentInterval[1], nextInterval[1]);
             } else {
                 currentInterval = nextInterval;
