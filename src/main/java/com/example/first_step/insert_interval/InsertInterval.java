@@ -28,7 +28,7 @@ import java.util.List;
  * Заметка по паттерну
  * Паттерн: три фазы в одном проходе.
  * Ключевая идея:
- * Фаза 1: интервал полностью слева (interval.end < new.start) → копируем.
+ * Фаза 1: интервал полностью слева (interval.end < newInterval.start) → копируем.
  * Фаза 2: пересекается (interval.start <= new.end) → расширяем new через min/max, не копируем.
  * Фаза 3: интервал справа → break.
  * После цикла: добавить newInterval, потом докопировать остаток.
@@ -41,6 +41,7 @@ import java.util.List;
  * Расширение
  * newInterval.start = min(newInterval.start, interval.start)
  * newInterval.end = max(newInterval.end, interval.end)
+ * вернуть result.toArray(new int[result.size()][]);
  * Сложность
  * Время: O(n) — один проход, в отличие от Merge Intervals, где была сортировка O(n log n).
  * Память: O(n) — для результата.
@@ -52,7 +53,6 @@ public class InsertInterval {
 
         System.out.println(Arrays.deepToString(insert(intervals, newInterval)));
     }
-
 
     public static int[][] insert(int[][] intervals, int[] newInterval) {
         if (intervals == null || intervals.length == 0) {
