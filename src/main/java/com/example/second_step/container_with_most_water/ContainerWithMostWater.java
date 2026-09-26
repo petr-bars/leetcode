@@ -34,6 +34,11 @@ package com.example.second_step.container_with_most_water;
  * maxArea = max(maxArea, area)
  * Если height[left] < height[right] → left++, иначе → right--.
  * Вернуть maxArea.
+ * Проверка [1,8,6,2,5,4,8,3,7]
+ * L=0 (1), R=8 (7), min=1, area=8. Левый while: 1<=1 → L=1 (8, стоп). Правый while: 7<=1? нет.
+ * L=1 (8), R=8 (7), min=7, area=49. Левый: 8<=7? нет. Правый: 7<=7 → R=7 (3), 3<=7 → R=6 (8, стоп).
+ * L=1 (8), R=6 (8), min=8, area=40. Левый: 8<=8 → L=2 (6), 6<=8 → L=3 (2), 2<=8 → L=4 (5), 5<=8 → L=5 (4), 4<=8 → L=6. L=R=6 → стоп.
+ * Return 49 ✓
  * Сложность
  * Время: O(n) — каждый указатель двигается не более n раз.
  * Память: O(1).
@@ -46,24 +51,24 @@ public class ContainerWithMostWater {
     }
 
     public static int maxArea(int[] height) {
-        int leftIndex = 0;
-        int rightIndex = height.length - 1;
+        int left = 0;
+        int right = height.length - 1;
         int maxArea = 0;
 
-        while (leftIndex < rightIndex) {
-            int minHeight = Math.min(height[leftIndex], height[rightIndex]);
-            int width = rightIndex - leftIndex;
+        while (left < right) {
+            int minHeight = Math.min(height[left], height[right]);
+            int width = right - left;
             int currentArea = minHeight * width;
             maxArea = Math.max(maxArea, currentArea);
 
             /*Сдвигаемся не на один шаг как в классическом решении, а пропускаем сразу группами.
              * Аналогичным способом отрабатывали поиск дубликатов в задаче 3Sum
              * тем самым избегаем лишних шагов*/
-            while (leftIndex < rightIndex && height[leftIndex] <= minHeight) {
-                leftIndex++;
+            while (left < right && height[left] <= minHeight) {
+                left++;
             }
-            while (leftIndex < rightIndex && height[rightIndex] <= minHeight) {
-                rightIndex--;
+            while (left < right && height[right] <= minHeight) {
+                right--;
             }
         }
 
