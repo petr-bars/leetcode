@@ -33,28 +33,29 @@ public class ValidPalindrome {
         String s = "A man, a plan, a canal: Panama";
 //        String s = "race a car";
 
-        System.out.println(isPalindrome(s));
+        System.out.println(isPalindrome1(s));
     }
 
-    public static boolean isPalindrome(String s) {
-        int leftIndex = 0;
-        int rightIndex = s.length() - 1;
+    public static boolean isPalindrome1(String s) {
+        int left = 0;
+        int right = s.length() - 1;
 
-        while (leftIndex < rightIndex) {
-            char leftSymbol = s.charAt(leftIndex);
-            char rightSymbol = s.charAt(rightIndex);
-
-            if (!Character.isLetterOrDigit(leftSymbol)) {
-                leftIndex++;
-            } else if (!Character.isLetterOrDigit(rightSymbol)) {
-                rightIndex--;
-            } else {
-                if (Character.toLowerCase(leftSymbol) != Character.toLowerCase(rightSymbol)) {
-                    return false;
-                }
-                leftIndex++;
-                rightIndex--;
+        while (left < right) {
+            char leftCh = s.charAt(left);
+            char rightCh = s.charAt(right);
+            if (!Character.isLetterOrDigit(leftCh)) {
+                left++;
+                continue;
             }
+            if (!Character.isLetterOrDigit(rightCh)) {
+                right--;
+                continue;
+            }
+            if (Character.toLowerCase(leftCh) != Character.toLowerCase(rightCh)) {
+                return false;
+            }
+            left++;
+            right--;
         }
         return true;
     }
