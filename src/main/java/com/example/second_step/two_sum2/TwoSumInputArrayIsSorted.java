@@ -49,16 +49,17 @@ public class TwoSumInputArrayIsSorted {
     }
 
     public static int[] twoSum(int[] numbers, int target) {
-        int leftIndex = 0;
-        int rightIndex = numbers.length - 1;
-        while (leftIndex < rightIndex) {
-            int sum = numbers[leftIndex] + numbers[rightIndex];
+        int left = 0;
+        int right = numbers.length - 1;
+
+        while (left < right) {
+            int sum = numbers[left] + numbers[right];
             if (sum == target) {
-                return new int[]{leftIndex + 1, rightIndex + 1};
+                return new int[]{left + 1, right + 1};
             } else if (sum > target) {
-                rightIndex--;
+                right--;
             } else {
-                leftIndex++;
+                left++;
             }
         }
         return new int[0];
