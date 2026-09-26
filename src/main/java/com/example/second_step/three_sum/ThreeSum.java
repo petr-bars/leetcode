@@ -61,28 +61,28 @@ public class ThreeSum {
                 continue;
             }
 
-            int leftIndex = index + 1;
-            int rightIndex = nums.length - 1;
-            while (leftIndex < rightIndex) {
-                int sum = nums[index] + nums[leftIndex] + nums[rightIndex];
+            int left = index + 1;
+            int right = nums.length - 1;
+            while (left < right) {
+                int sum = nums[index] + nums[left] + nums[right];
                 if (sum == 0) {
-                    result.add(List.of(nums[index], nums[leftIndex], nums[rightIndex]));
+                    result.add(List.of(nums[index], nums[left], nums[right]));
 
-                    // Пропускаем дубликаты у leftIndex (сдвигаем, пока одинаковые).
-                    while (leftIndex < rightIndex && nums[leftIndex] == nums[leftIndex + 1]) {
-                        leftIndex++;
+                    // Пропускаем дубликаты у left (сдвигаем, пока одинаковые).
+                    while (left < right && nums[left] == nums[left + 1]) {
+                        left++;
                     }
-                    // Пропускаем дубликаты у rightIndex (сдвигаем, пока одинаковые).
-                    while (leftIndex < rightIndex && nums[rightIndex] == nums[rightIndex - 1]) {
-                        rightIndex--;
+                    // Пропускаем дубликаты у right (сдвигаем, пока одинаковые).
+                    while (left < right && nums[right] == nums[right - 1]) {
+                        right--;
                     }
 
-                    leftIndex++;
-                    rightIndex--;
+                    left++;
+                    right--;
                 } else if (sum < 0) {
-                    leftIndex++;
+                    left++;
                 } else {
-                    rightIndex--;
+                    right--;
                 }
             }
         }
