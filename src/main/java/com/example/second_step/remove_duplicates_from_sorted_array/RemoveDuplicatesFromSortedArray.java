@@ -29,6 +29,12 @@ package com.example.second_step.remove_duplicates_from_sorted_array;
  * nums[write] = nums[read]
  * вернуть write + 1
  * write — индекс последнего уникального. write + 1 — их количество.
+ * Проверка [1,1,2,3]
+ * read=1: nums[1]=1, nums[write]=nums[0]=1 → равны → пропуск. Массив [1,1,2,3].
+ * read=2: nums[2]=2 ≠ nums[0]=1 → write=1, nums[1]=2. Массив [1,2,2,3].
+ * read=3: nums[3]=3 ≠ nums[1]=2 → write=2, nums[2]=3. Массив [1,2,3,3].
+ * return write + 1 = 3.
+ * Первые 3 элемента: [1,2,3]. Хвост 3 — мусор, не проверяется.
  * Сложность
  * Время: O(n) — один проход.
  * Память: O(1) — на месте.
