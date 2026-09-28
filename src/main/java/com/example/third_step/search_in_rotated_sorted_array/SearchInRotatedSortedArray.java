@@ -1,21 +1,132 @@
 package com.example.third_step.search_in_rotated_sorted_array;
 
 /**
- * There is an integer array nums sorted in ascending order (with distinct values).
- * <p>
- * Prior to being passed to your function, nums is possibly left rotated at an unknown index k (1 <= k < nums.length)
- * such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] (0-indexed).
- * For example, [0,1,2,4,5,6,7] might be left rotated by 3 indices and become [4,5,6,7,0,1,2].
- * <p>
- * Given the array nums after the possible rotation and an integer target, return the index of target if it is in nums,
- * or -1 if it is not in nums.
- * <p>
- * You must write an algorithm with O(log n) runtime complexity.
+ * <p>There is an integer array nums sorted in ascending order (with distinct values).
+ * Prior to being passed to your function, nums is possibly left rotated at an unknown
+ * index k (1 &lt;= k &lt; nums.length) such that the resulting array is
+ * [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] (0-indexed).
+ * For example, [0,1,2,4,5,6,7] might be left rotated by 3 indices and become
+ * [4,5,6,7,0,1,2].</p>
+ *
+ * <p>Given the array nums after the possible rotation and an integer target,
+ * return the index of target if it is in nums, or -1 if it is not in nums.
+ * You must write an algorithm with O(log n) runtime complexity.</p>
+ *
+ * <p>Дан массив nums, отсортированный по возрастанию (все значения уникальны),
+ * но возможно сдвинутый влево на неизвестный индекс k. Например,
+ * [0,1,2,4,5,6,7] после сдвига на 3 становится [4,5,6,7,0,1,2]. Дан target.
+ * Вернуть индекс target, если он есть в массиве, иначе -1. Решение должно
+ * работать за O(log n).</p>
+ *
+ * <p>Пример:<br>
+ * Вход:  nums = [4,5,6,7,0,1,2], target = 0<br>
+ * Выход: 4</p>
+ *
+ * <p>Пример:<br>
+ * Вход:  nums = [4,5,6,7,0,1,2], target = 3<br>
+ * Выход: -1</p>
+ *
+ * <p>Паттерн:<br>
+ * Бинарный поиск с определением отсортированной половины.</p>
+ *
+ * <p>Идея:<br>
+ * Массив сдвинут, но не «сломан». Ключевое свойство: если разделить текущий
+ * отрезок пополам, то **хотя бы одна из двух половин отсортирована**. Это
+ * потому что сдвиг рвёт сортировку только в одной точке. Значит, на каждом
+ * шаге мы сначала определяем, какая половина отсортирована, а потом проверяем,
+ * может ли target лежать внутри неё. Если может — идём в неё. Если нет — идём
+ * в другую половину.</p>
+ *
+ * <p>Логика и шаги:</p>
+ * <ul>
+ *   <li>Инициализация. Левая граница — начало массива, правая — конец.
+ *       Отрезок пока весь массив.</li>
+ *   <li>Пока отрезок не пуст (левая граница не перешла за правую):
+ *       <ul>
+ *         <li>Берём середину. mid = left + (right - left) / 2.</li>
+ *         <li>Если nums[mid] == target → нашли, вернуть mid.</li>
+ *         <li>Определяем, какая половина отсортирована:
+ *             <ul>
+ *               <li>Если nums[left] &lt;= nums[mid] → **левая половина
+ *                   отсортирована** (от left до mid по возрастанию).</li>
+ *               <li>Иначе → **правая половина отсортирована** (от mid до right
+ *                   по возрастанию).</li>
+ *             </ul>
+ *         </li>
+ *         <li>Если отсортирована левая половина, проверяем: попадает ли target
+ *             в диапазон [nums[left], nums[mid])?
+ *             <ul>
+ *               <li>Да → идём в левую половину: right = mid - 1.</li>
+ *               <li>Нет → идём в правую: left = mid + 1.</li>
+ *             </ul>
+ *         </li>
+ *         <li>Если отсортирована правая половина, проверяем: попадает ли target
+ *             в диапазон (nums[mid], nums[right]]?
+ *             <ul>
+ *               <li>Да → идём в правую половину: left = mid + 1.</li>
+ *               <li>Нет → идём в левую: right = mid - 1.</li>
+ *             </ul>
+ *         </li>
+ *       </ul>
+ *   </li>
+ *   <li>Если цикл закончился — target не найден, вернуть -1.</li>
+ * </ul>
+ *
+ * <p>Ключевая тонкость (какая половина отсортирована):<br>
+ * Сравниваем nums[left] и nums[mid]. Если nums[left] &lt;= nums[mid] — левая
+ * половина по возрастанию, значит отсортирована. Если nums[left] &gt; nums[mid]
+ * — где-то между ними точка сдвига, значит отсортирована правая половина.
+ * Это следствие того, что массив был отсортирован до сдвига, и сдвиг портит
+ * сортировку только в одном месте.</p>
+ *
+ * <p>Ключевая тонкость (проверка диапазона):<br>
+ * Когда мы знаем, что половина отсортирована, мы можем проверить, лежит ли
+ * target внутри неё — по обычному правилу для отсортированного массива:
+ * nums[граница_левая] &lt;= target &lt; nums[граница_правая]. Если target
+ * внутри — идём туда. Если снаружи — значит, target в другой половине,
+ * даже если она не отсортирована. Потому что других вариантов нет.</p>
+ *
+ * <p>Ключевая тонкость (границы):<br>
+ * Середину проверяем и исключаем: left = mid + 1, right = mid - 1.
+ * Условие цикла — left &lt;= right. Иначе потеряешь последний элемент.</p>
+ *
+ * <p>Типичные ошибки:</p>
+ * <ul>
+ *   <li>Пытаться найти точку сдвига отдельным проходом. Это удлиняет решение
+ *       и усложняет код. Определение отсортированной половины делает всё
+ *       за один бинарный поиск.</li>
+ *   <li>Путать, какую половину проверять после определения отсортированной.
+ *       Если отсортирована левая — проверяй диапазон слева. Если правая —
+ *       диапазон справа.</li>
+ *   <li>Использовать строгое неравенство вместо нестрогого при сравнении
+ *       nums[left] &lt;= nums[mid]. Случай равенства (left == mid) тоже
+ *       означает, что левая половина «отсортирована» (она из одного элемента).</li>
+ *   <li>Сравнивать mid с target вместо nums[mid].</li>
+ *   <li>Сдвигать границы на один шаг вместо mid ± 1.</li>
+ * </ul>
+ *
+ * <p>Проверки:</p>
+ * <ul>
+ *   <li>target в середине массива.</li>
+ *   <li>target в левой отсортированной части.</li>
+ *   <li>target в правой отсортированной части.</li>
+ *   <li>target в точке сдвига.</li>
+ *   <li>target отсутствует.</li>
+ *   <li>массив не сдвинут (обычный отсортированный).</li>
+ *   <li>массив сдвинут на 1.</li>
+ *   <li>массив из одного элемента, target совпадает.</li>
+ *   <li>массив из одного элемента, target не совпадает.</li>
+ *   <li>массив из двух элементов, target в каждом из них.</li>
+ * </ul>
+ *
+ * <p>Сложность:<br>
+ * Время: O(log n) — бинарный поиск, каждый шаг делит отрезок пополам.<br>
+ * Память: O(1) — только границы и середина.</p>
  */
 public class SearchInRotatedSortedArray {
     public static void main(String[] args) {
         int[] nums = new int[]{4, 5, 6, 7, 0, 1, 2};
-        int target = 0;
+        int target = 7;
 
         System.out.println(search(nums, target));
     }
