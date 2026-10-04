@@ -166,7 +166,7 @@ public class CapacityToShipPackages {
                 }
             }
 
-            if (totalDays <= days) {
+            if (totalDays <= days) {// Почему не currentCapacity -1, потому что он может быть искомым.
                 maxCapacity = currentCapacity;
             } else {
                 minCapacity = currentCapacity + 1;
