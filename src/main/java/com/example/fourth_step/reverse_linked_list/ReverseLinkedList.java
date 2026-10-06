@@ -3,7 +3,41 @@ package com.example.fourth_step.reverse_linked_list;
 import java.util.Objects;
 
 /**
- * Given the head of a singly linked list, reverse the list, and return the reversed list.
+ * <p>Given the head of a singly linked list, reverse the list, and return
+ * the reversed list.</p>
+ *
+ * <p>Дан головной узел односвязного списка. Развернуть список и вернуть
+ * новую голову.</p>
+ *
+ * <p>Пример:<br>
+ * Вход:  head = [1,2,3,4,5]<br>
+ * Выход: [5,4,3,2,1]</p>
+ *
+ * <p>Паттерн:<br>
+ * Три указателя + итеративный проход.</p>
+ *
+ * <p>Идея:<br>
+ * Идём по списку и на каждом узле разворачиваем ссылку назад. Чтобы
+ * не потерять хвост, сначала запоминаем следующий узел, потом разворачиваем,
+ * потом сдвигаем оба указателя вперёд. prev в конце становится новой головой.</p>
+ *
+ * <p>Формула:</p>
+ * <ul>
+ *   <li>prev = null, current = head.</li>
+ *   <li>Пока current не null:
+ *       <ul>
+ *         <li>запомнить nextNode — следующий узел после current;</li>
+ *         <li>развернуть ссылку current на prev;</li>
+ *         <li>сдвинуть prev на current;</li>
+ *         <li>сдвинуть current на nextNode.</li>
+ *       </ul>
+ *   </li>
+ *   <li>Вернуть prev — новая голова.</li>
+ * </ul>
+ *
+ * <p>Сложность:<br>
+ * Время: O(n).<br>
+ * Память: O(1).</p>
  */
 public class ReverseLinkedList {
     public static void main(String[] args) {
