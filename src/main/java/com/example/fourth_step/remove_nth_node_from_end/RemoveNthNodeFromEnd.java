@@ -1,7 +1,44 @@
 package com.example.fourth_step.remove_nth_node_from_end;
 
 /**
- * Given the head of a linked list, remove the nth node from the end of the list and return its head.
+ * <p>Given the head of a linked list, remove the nth node from the end of
+ * the list and return its head.</p>
+ *
+ * <p>Дан головной узел связного списка. Удалить n-й узел с конца и вернуть
+ * голову списка.</p>
+ *
+ * <p>Пример:<br>
+ * Вход:  head = [1,2,3,4,5], n = 2<br>
+ * Выход: [1,2,3,5]</p>
+ *
+ * <p>Пример:<br>
+ * Вход:  head = [1], n = 1<br>
+ * Выход: []</p>
+ *
+ * <p>Паттерн:<br>
+ * Dummy node + два указателя с отступом.</p>
+ *
+ * <p>Идея:<br>
+ * Ставим два указателя на dummy. Fast уводим на n шагов вперёд. Дальше
+ * двигаем оба синхронно, пока fast не дойдёт до последнего узла. Тогда
+ * slow окажется ровно перед удаляемым узлом, и мы перескакиваем через него.
+ * Dummy — нулевой узел перед головой, чтобы не падать, если удалять надо
+ * саму голову. Без него slow не сможет её удалить: нет узла, который мог бы
+ * перескочить через неё.</p>
+ *
+ * <p>Формула:</p>
+ * <ul>
+ *   <li>Создаём фиктивный узел dummy со значением 0 и next = head.</li>
+ *   <li>slow = dummy, fast = dummy.</li>
+ *   <li>Сдвинуть fast на n шагов вперёд</li>
+ *   <li>Пока fast.next не null: сдвинуть slow и fast на 1 шаг.</li>
+ *   <li>slow.next = slow.next.next — удалить узел после slow.</li>
+ *   <li>Вернуть dummy.next — настоящую голову.</li>
+ * </ul>
+ *
+ * <p>Сложность:<br>
+ * Время: O(n).<br>
+ * Память: O(1).</p>
  */
 public class RemoveNthNodeFromEnd {
     static class ListNode {
@@ -22,31 +59,23 @@ public class RemoveNthNodeFromEnd {
     }
 
     public static void main(String[] args) {
-        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
+//        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
+        ListNode head = createList(new int[]{1, 2});
         int n = 2;
-//        System.out.println(listToString(removeNthFromEndSimple(head, n)));
+
         System.out.println(listToString(removeNthFromEnd(head, n)));
     }
 
-
-    /**
-     * Суть подхода с использованием двух указателей с фиксированным отрывом, в итоге тот который медленный указатель
-     * будет указывать на позицию удаляемого элемента -1, дальше все просто переброс ссылки.
-     */
     public static ListNode removeNthFromEnd(ListNode head, int n) {
-        if (head.next == null) {
-            return null;
-        }
-
         ListNode dummy = new ListNode(0);
         dummy.next = head;
         ListNode slow = dummy;
         ListNode fast = dummy;
-        for (int i = 0; i <= n; i++) { // i <= n, потому что начинаем с 0, итого n+1 итераций
+        for (int index = 0; index < n; index++) {
             fast = fast.next;
         }
 
-        while (fast != null) {
+        while (fast.next != null) {
             slow = slow.next;
             fast = fast.next;
         }
@@ -55,24 +84,6 @@ public class RemoveNthNodeFromEnd {
         return dummy.next;
     }
 
-    /**
-     * Суть подхода таже что и с двумя указателями ищем длину списка, затем позицию удаляемого узла -1 только через
-     * формулу длина списка - n -1, после чего также перебрасываем ссылку.
-     */
-    public static ListNode removeNthFromEndSimple(ListNode head, int n) {
-        int length = getSize(head);
-
-        if (length == n) {
-            return head.next;
-        }
-
-        ListNode current = head;
-        for (int i = 0; i < length - n - 1; i++) {
-            current = current.next;
-        }
-        current.next = current.next.next;
-        return head;
-    }
 
     // Вспомогательный метод для создания списка из массива
     public static ListNode createList(int[] arr) {
@@ -86,16 +97,6 @@ public class RemoveNthNodeFromEnd {
             current = current.next;
         }
         return head;
-    }
-
-    public static int getSize(ListNode head) {
-        ListNode cur = head;
-        int count = 0;
-        while (cur != null) {
-            count++;
-            cur = cur.next;
-        }
-        return count;
     }
 
     public static String listToString(ListNode head) {
