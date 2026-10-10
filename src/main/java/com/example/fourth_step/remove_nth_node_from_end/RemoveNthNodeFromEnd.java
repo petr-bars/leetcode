@@ -28,7 +28,7 @@ package com.example.fourth_step.remove_nth_node_from_end;
  *
  * <p>Формула:</p>
  * <ul>
- *   <li>Создаём фиктивный узел dummy со значением 0 и next = head.</li>
+ *   <li>Создаём фиктивный узел dummy со значением 0 и dummy.next = head.</li>
  *   <li>slow = dummy, fast = dummy.</li>
  *   <li>Сдвинуть fast на n шагов вперёд</li>
  *   <li>Пока fast.next не null: сдвинуть slow и fast на 1 шаг.</li>
@@ -45,22 +45,14 @@ public class RemoveNthNodeFromEnd {
         int val;
         ListNode next;
 
-        ListNode() {
-        }
-
         ListNode(int val) {
             this.val = val;
-        }
-
-        ListNode(int val, ListNode next) {
-            this.val = val;
-            this.next = next;
         }
     }
 
     public static void main(String[] args) {
-//        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
-        ListNode head = createList(new int[]{1, 2});
+        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
+//        ListNode head = createList(new int[]{1, 2});
         int n = 2;
 
         System.out.println(listToString(removeNthFromEnd(head, n)));
@@ -69,21 +61,24 @@ public class RemoveNthNodeFromEnd {
     public static ListNode removeNthFromEnd(ListNode head, int n) {
         ListNode dummy = new ListNode(0);
         dummy.next = head;
-        ListNode slow = dummy;
         ListNode fast = dummy;
+        ListNode slow = dummy;
+
+        // Сдвинули fast на n шагов вперед
         for (int index = 0; index < n; index++) {
             fast = fast.next;
         }
 
+        // Сдвигаем оба указателя по 1му шагу за итерацию.
         while (fast.next != null) {
             slow = slow.next;
             fast = fast.next;
         }
 
+        // Теперь медленный стоит на элементе перед удаляемым нужно только перебросить ссылку.
         slow.next = slow.next.next;
         return dummy.next;
     }
-
 
     // Вспомогательный метод для создания списка из массива
     public static ListNode createList(int[] arr) {
