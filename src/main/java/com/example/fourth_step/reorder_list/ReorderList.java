@@ -51,9 +51,6 @@ public class ReorderList {
         int val;
         ListNode next;
 
-        ListNode() {
-        }
-
         ListNode(int val) {
             this.val = val;
         }
@@ -70,8 +67,8 @@ public class ReorderList {
             return;
         }
 
-        ListNode slow = head;
         ListNode fast = head;
+        ListNode slow = head;
         //Ищем середину
         while (fast != null && fast.next != null) {
             slow = slow.next;
@@ -92,16 +89,14 @@ public class ReorderList {
             current = temp;
         }
 
-        ListNode fistNext;
-        ListNode secondNext;
-        ListNode first = head;
         //Чередуем элементы друг за другом из двух половин
+        ListNode first = head;
         while (second != null) {
-            fistNext = first.next;
-            secondNext = second.next;
+            ListNode firstNext = first.next;
+            ListNode secondNext = second.next;
             first.next = second;
-            second.next = fistNext;
-            first = fistNext;
+            second.next = firstNext;
+            first = firstNext;
             second = secondNext;
         }
     }
